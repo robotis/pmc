@@ -1,0 +1,69 @@
+"pyth.mexe" = start in
+!
+{{
+start =
+	fun()
+	{
+		try
+		{
+			main();
+		}
+		catch(e)
+		{
+			printExceptionTrace(&e);
+		};
+	};
+
+main =
+	fun()
+	{
+		var pl,p,x,y,z,i;
+		pl = pyth();
+		for( i=0 ; i!=100 ; i=inc(i) )
+		{
+			p = streamHead(pl);
+			pl = streamTail(pl);
+			x = head(p); p = tail(p);
+			y = head(p); p = tail(p);
+			z = head(p); p = tail(p);
+			writeln("(x,y,z)=("++x++","++y++","++z++")");
+		};
+	};
+
+;;;sqrt =
+;;;	fun(x)
+;;;	{
+;;;		"java.lang.Math".##sqrt(("double")double(x));
+;;;	};
+
+mapStream =
+	fun(f,s)
+	{
+		s==[] && (return []);
+		#[f(streamHead(s)) $ mapStream(f,streamTail(s))];
+	};
+
+pyth =
+	fun()
+	{
+		seq
+		{
+			y #<<= from(2);
+			x #<<= fromUpTo(1,dec(y));
+			val z = long(sqrt(double(x*x+y*y)));
+			z #<<= if( x*x+y*y == z*z ) {#[z];} else {#[];};
+			if( gcd(gcd(x,y),z) == 1 ) {#[[x,y,z]];} else {#[];};
+		};
+	};
+
+gcd =
+	fun(x,y)
+	{
+		x>y && (return gcd(y,x));
+		x==0 && (return y);
+		gcd(y%x,x);
+	};
+}}
+*
+BASIS
+;

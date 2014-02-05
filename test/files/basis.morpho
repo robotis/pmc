@@ -1,0 +1,2168 @@
+{;;;
+
+Copyright (C) 2009-2013 Snorri Agnarsson
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+;;;}
+
+readline =
+!
+{{
+;;; Notkun:   line = readLine();
+;;; Eftir:    line inniheldur næstu línu af aðalinntaki.
+;;; Afbrigði: Ef villa eða skrárlok kemur upp í lestri
+;;;           verður line==null.
+readLine =
+	fun()
+	{
+		taskvar input;
+		input || (input = scanner());
+		var line;
+		try
+		{
+			line = ("java.util.Scanner")input.#nextLine();
+		}
+		catch e
+		{
+			line = null;
+		};
+		line;
+	};
+
+scanner =
+	fun()
+	{
+		taskvar input;
+		if( !input )
+		{
+			val charset = "java.nio.charset.Charset".##defaultCharset();
+			val charsetname = ("java.nio.charset.Charset")charset.#name();
+			input =
+				new "java.util.Scanner"(
+						("java.io.InputStream")"java.lang.System".##"in",
+						("java.lang.String")charsetname
+					);
+		};
+		input;
+	};
+}}
+*
+{{
+input = taskvar final;
+}}
+;
+
+{;;;
+reflection =
+{{
+makeArrayOfClassByName =
+	fun(name,n)
+	{
+		makeArrayOfClass(findClass(name),n);
+	};
+
+invoke =
+	fun(ob,name,args)
+	{
+		var method = findMethod(classOf(ob),name,classlist(args));
+		invokeMethod(ob,method,objlist(args));
+	};
+
+classInvoke =
+	fun(class,name,args)
+	{
+		var method,classof;
+		classof = findClass(class);
+		method = findMethod(classof,name,classlist(args));
+		invokeMethod(null,method,objlist(args));
+	};
+
+construct =
+	fun(name,args)
+	{
+		var constructor;
+		constructor = findConstructor(findClass(name),classlist(args));
+		makeObject(constructor,objlist(args));
+	};
+
+get =
+	fun(ob,name)
+	{
+		var field;
+		field = findField(classOf(ob),name);
+		getField(ob,field);
+	};
+
+set =
+	fun(ob,name,value)
+	{
+		var field;
+		field = findField(classOf(ob),name);
+		setField(ob,field,value);
+		value;
+	};
+
+classGet =
+	fun(class,name)
+	{
+		var field,classof;
+		classof = findClass(class);
+		field = findField(classof,name);
+		getField(null,field);
+	};
+
+classSet =
+	fun(class,name,value)
+	{
+		var field = findField(class,name), classof;
+		classof = findClass(class);
+		setField(null,field,value);
+		value;
+	};
+}}
+*
+!
+{{
+classlist =
+	fun(x)
+	{
+		var myClassOf =
+			fun(obj_or_pair)
+			{
+				if( isPair(obj_or_pair) )
+				{
+					findClass(head(obj_or_pair));
+				}
+				else
+				{
+					classOf(obj_or_pair);
+				};
+			};
+		var res,last,myx=x;
+		myx==[] && (return []);
+		last = res = [myClassOf(head(x))];
+		myx = tail(myx);
+		while( myx!=[] )
+		{
+			setTail(last,last=[myClassOf(head(myx))]);
+			myx = tail(myx);
+		};
+		res;
+	};
+
+objlist =
+	fun(x)
+	{
+		var myx=x;
+		var objOf =
+			fun(obj_or_pair)
+			{
+				if( isPair(obj_or_pair) )
+				{
+					head(tail(obj_or_pair));
+				}
+				else
+				{
+					obj_or_pair;
+				};
+			};
+		var res,last;
+		myx==[] && (return []);
+		last = res = [objOf(head(x))];
+		myx = tail(myx);
+		while( myx!=[] )
+		{
+			setTail(last,last=[objOf(head(myx))]);
+			myx = tail(myx);
+		};
+		res;
+	};
+}}
+;
+;;;}
+
+fiberscheduler =
+!
+{{
+startFiber =
+	fun(f)
+	{
+		val inner=
+			fun()
+			{
+				try
+				{
+					f();
+				}
+				catch(e)
+				{
+                    writeln("Exception in fiber: "++e);
+					printExceptionTrace(&e);
+				};
+				killFiber();
+			};
+		lowStartFiber(inner);
+	};
+
+startFiber =
+	fun(f,x)
+	{
+		startFiber(fun(){f(x)});
+	};
+}}
+*
+{{
+#"lowStartFiber[f1]" = builtin(STARTFIBER);
+}}
+;
+
+basis =
+readline
+:
+{{
+#"channelEOF[f0]" = builtin(CHANNELEOF);
+}}
+:
+fiberscheduler
+;;;:
+;;;reflection
+:
+!
+{{
+turtle =
+	obj()
+	{
+		var g = new "is.hi.cs.morpho.GraphicFrame"();
+		var x = 0.0,
+			y = 0.0,
+			dx = 1.0,
+			dy = 0.0,
+			color = "java.awt.Color".##RED;
+		var angle = 0.0;
+		var hidden = false;
+		var up = false;
+		{
+			("is.hi.cs.morpho.GraphicFrame")g.#setVisible(("boolean")true);
+			("is.hi.cs.morpho.GraphicFrame")g.#setTurtle(("double")x,("double")y,("double")angle);
+		};
+		msg get x
+			{
+				x;
+			};
+		msg get y
+			{
+				y;
+			};
+		msg get angle
+			{
+				angle;
+			};
+		msg get color
+			{
+				color;
+			};
+		msg get window
+			{
+				g;
+			};
+		msg get up
+			{
+				up;
+			};
+		msg get hidden
+			{
+				hidden;
+			};
+		msg get width
+			{
+				("is.hi.cs.morpho.GraphicFrame")g.#getWidth();
+			};
+		msg get height
+			{
+				("is.hi.cs.morpho.GraphicFrame")g.#getHeight();
+			};
+		msg clear()
+			{
+				("is.hi.cs.morpho.GraphicFrame")g.#clear();
+			};
+		msg setSize(w,h)
+			{
+				("is.hi.cs.morpho.GraphicFrame")g.#setSize(("int")int(w),("int")int(h));
+			};
+		msg setScaling(xorg,yorg,xscale,yscale)
+			{
+				("is.hi.cs.morpho.GraphicFrame")g.#setScaling
+					( ("double")double(xorg)
+					, ("double")double(yorg)
+					, ("double")double(xscale)
+					, ("double")double(yscale)
+					);
+			};
+		msg get xorg
+			{
+				("is.hi.cs.morpho.GraphicFrame")g.#getXOrg();
+			};
+		msg get yorg
+			{
+				("is.hi.cs.morpho.GraphicFrame")g.#getYOrg();
+			};
+		msg get xscale
+			{
+				("is.hi.cs.morpho.GraphicFrame")g.#getXScale();
+			};
+		msg get yscale
+			{
+				("is.hi.cs.morpho.GraphicFrame")g.#getYScale();
+			};
+		msg forward(d)
+			{
+				if( up )
+				{
+					this.moveTo(x+d*dx,y+d*dy);
+				}
+				else
+				{
+					this.drawTo(x+d*dx,y+d*dy);
+				};
+			};
+		msg drawTo(xx,yy)
+			{
+				("is.hi.cs.morpho.GraphicFrame")g.#addLine	( ("double")x
+															, ("double")y
+															, ("double")xx
+															, ("double")yy
+															, ("java.awt.Color")color
+															);
+				x = xx;
+				y = yy;
+				if( hidden )
+				{
+					("is.hi.cs.morpho.GraphicFrame")g.#hideTurtle();
+				}
+				else
+				{
+					("is.hi.cs.morpho.GraphicFrame")g.#setTurtle(("double")x,("double")y,("double")angle);
+				};
+			};
+		msg moveTo(xx,yy)
+			{
+				x = xx;
+				y = yy;
+				if( !hidden )
+				{
+					("is.hi.cs.morpho.GraphicFrame")g.#setTurtle(("double")x,("double")y,("double")angle);
+				};
+			};
+		msg up()
+			{
+				up = true;
+			};
+		msg down()
+			{
+				up = false;
+			};
+		msg hide()
+			{
+				hidden = true;
+				("is.hi.cs.morpho.GraphicFrame")g.#hideTurtle();
+			};
+		msg show()
+			{
+				hidden = false;
+				("is.hi.cs.morpho.GraphicFrame")g.#setTurtle(("double")x,("double")y,("double")angle);
+			};
+		msg left()
+			{
+				val t = dy;
+				dy = dx;
+				dx = -t;
+				angle = angle+90.0;
+				if( angle >= 360.0 )
+				{
+					angle = angle-360.0;
+				};
+				if( hidden )
+				{
+					("is.hi.cs.morpho.GraphicFrame")g.#hideTurtle();
+				}
+				else
+				{
+					("is.hi.cs.morpho.GraphicFrame")g.#setTurtle(("double")x,("double")y,("double")angle);
+				};
+			};
+		msg right()
+			{
+				val t = dy;
+				dy = -dx;
+				dx = t;
+				angle = angle-90.0;
+				if( angle < 0.0 )
+				{
+					angle = angle+360.0;
+				};
+				if( hidden )
+				{
+					("is.hi.cs.morpho.GraphicFrame")g.#hideTurtle();
+				}
+				else
+				{
+					("is.hi.cs.morpho.GraphicFrame")g.#setTurtle(("double")x,("double")y,("double")angle);
+				};
+			};
+		msg color(c)
+			{
+				val old = color;
+				color = c;
+				old;
+			};
+		msg color()
+			{
+				color;
+			};
+		msg color(r,g,b)
+			{
+				val old = color;
+				color = new "java.awt.Color"(("int")int(r),("int")int(g),("int")int(b));
+				old;
+			};
+		msg direction(a)
+			{
+				angle = a;
+				val radians = angle/180.0*"java.lang.Math".##PI;
+				dx = cos(radians);
+				dy = sin(radians);
+				if( hidden )
+				{
+					("is.hi.cs.morpho.GraphicFrame")g.#hideTurtle();
+				}
+				else
+				{
+					("is.hi.cs.morpho.GraphicFrame")g.#setTurtle(("double")x,("double")y,("double")angle);
+				};
+			};
+		msg turn(da)
+			{
+				angle = angle+da;
+				if( angle >= 360.0 )
+				{
+					angle = angle-360.0;
+				}
+				elsif( angle < 0.0 )
+				{
+					angle = angle+360;
+				};
+				val radians = angle/180.0*"java.lang.Math".##PI;
+				dx = cos(radians);
+				dy = sin(radians);
+				if( hidden )
+				{
+					("is.hi.cs.morpho.GraphicFrame")g.#hideTurtle();
+				}
+				else
+				{
+					("is.hi.cs.morpho.GraphicFrame")g.#setTurtle(("double")x,("double")y,("double")angle);
+				};
+			};
+	};
+
+;;; Use:  s = makeChannelSelector();
+;;; Post: s is a new empty and stopped channel selector.
+makeChannelSelector =
+	obj()
+	{
+		var cc = null;
+		var rsList = [];
+		var wsList = [];
+		var rsArr,wsArr;
+	msg addReadSubscription(c)
+		{
+			if( cc )
+			{
+				("is.hi.cs.morpho.ChannelSubscriber")cc.#attachReadable(("is.hi.cs.morpho.Channel")c);
+			}
+			else
+			{
+				rsList = c:rsList;
+			};
+		};
+	msg addWriteSubscription(c)
+		{
+			if( cc )
+			{
+				("is.hi.cs.morpho.ChannelSubscriber")cc.#attachWritable(("is.hi.cs.morpho.Channel")c);
+			}
+			else
+			{
+				wsList = c:wsList;
+			};
+		};
+	msg removeReadSubscription(c)
+		{
+			("is.hi.cs.morpho.ChannelSubscriber")cc.#detachReadable(("is.hi.cs.morpho.Channel")c);
+		};
+	msg removeWriteSubscription(c)
+		{
+			("is.hi.cs.morpho.ChannelSubscriber")cc.#detachWritable(("is.hi.cs.morpho.Channel")c);
+		};
+	msg start()
+		{
+			rec fun length(x)
+			{
+				var n = 0;
+				while( x )
+				{
+					n = inc(n);
+					x = tail(x);
+				};
+				n
+			};
+			rec fun listToArray(x)
+			{
+				val n = length(x);
+				val arr = makeArray(n);
+				for( var i=0 ; x ; i=inc(i) )
+				{
+					arr[i] = head(x);
+					x = tail(x);
+				};
+				arr
+			};
+			rsArr = listToArray(rsList);
+			wsArr = listToArray(wsList);
+			cc = new "is.hi.cs.morpho.ChannelSubscriber"();
+			("is.hi.cs.morpho.ChannelSubscriber")cc.#attach(("java.lang.Object[]")rsArr,("java.lang.Object[]")wsArr);
+			cc
+		};
+	};
+
+#"tryToReadChannel[f1]" = builtin(TRYCHANNELREAD);
+
+initializeForeground =
+	fun()
+	{
+		if( "is.hi.cs.morpho.DuctTapeAndChewingGum".##foregroundInitialized() )
+		{
+			return [];
+		};
+		val foregroundStarter =
+			fun()
+			{
+				val c = "is.hi.cs.morpho.DuctTapeAndChewingGum".##getForegroundTaskChannel();
+				for(;;)
+				{
+					val f = <- c;
+					startTask(f);
+				};
+			};
+		startTask(foregroundStarter);
+	};
+
+initializeBackground =
+	fun()
+	{
+		if( "is.hi.cs.morpho.DuctTapeAndChewingGum".##backgroundInitialized() )
+		{
+			return [];
+		};
+		val backgroundStarter =
+			fun()
+			{
+				val c = "is.hi.cs.morpho.DuctTapeAndChewingGum".##getBackgroundTaskChannel();
+				for(;;)
+				{
+					val f = <- c;
+					startTask(f);
+				};				
+			};
+		startMachine(backgroundStarter,0);
+	};
+
+startBackgroundTask =
+	fun(f,x)
+	{
+		initializeBackground();
+		"is.hi.cs.morpho.DuctTapeAndChewingGum".##getBackgroundTaskChannel() <- fun() {f(x);};
+	};
+
+startBackgroundTask =
+	fun(f)
+	{
+		initializeBackground();
+		"is.hi.cs.morpho.DuctTapeAndChewingGum".##getBackgroundTaskChannel() <- f;
+	};
+
+startForegroundTask =
+	fun(f,x)
+	{
+		initializeForeground();
+		"is.hi.cs.morpho.DuctTapeAndChewingGum".##getForegroundTaskChannel() <- fun() {f(x);};
+	};
+
+startForegroundTask =
+	fun(f)
+	{
+		initializeForeground();
+		"is.hi.cs.morpho.DuctTapeAndChewingGum".##getForegroundTaskChannel() <- f;
+	};
+
+makeThunk =
+	fun(getter,setter)
+	{
+		new "is.hi.cs.morpho.Thunk"
+				( ("is.hi.cs.morpho.Closure")getter
+				, ("is.hi.cs.morpho.Closure")setter
+				);
+	};
+
+getThunkGetter =
+	fun(thunk)
+	{
+		("is.hi.cs.morpho.Thunk")thunk.#getter
+	};
+
+getThunkSetter =
+	fun(thunk)
+	{
+		("is.hi.cs.morpho.Thunk")thunk.#setter
+	};
+
+nanoTime =
+	fun()
+	{
+		"java.lang.System".##nanoTime();
+	};
+
+format =
+	fun(fs,x0)
+	{
+		if( !isPair(x0) )
+		{
+			val arr = new "java.lang.Object"[1];
+			arr[0] = x0;
+			return formatArray(fs,arr);
+		};
+		var n=0, x=x0;
+		while( x0 )
+		{
+			n = inc(n);
+			x0 = tail(x0);
+		};
+		val arr = new "java.lang.Object"[int(n)];
+		var i=0;
+		while( x )
+		{
+			arr[i] = head(x);
+			x = tail(x);
+			i = inc(i);
+		};
+		formatArray(fs,arr);
+	};
+
+format =
+	fun(fs,x0,x1)
+	{
+		format(fs,[x0,x1]);
+	};
+
+format =
+	fun(fs,x0,x1,x2)
+	{
+		format(fs,[x0,x1,x2]);
+	};
+
+formatArray =
+	fun(fs,arr)
+	{
+		val b = new "java.lang.StringBuilder"();
+		val f = new "java.util.Formatter"(("java.lang.Appendable")b);
+		("java.util.Formatter")f.#format(("java.lang.String")fs,("java.lang.Object[]")arr);
+		("java.lang.StringBuilder")b.#toString();
+	};
+
+length =
+	fun(x)
+	{
+		var n = 0;
+		while( x )
+		{
+			x = tail(x);
+			n = inc(n);
+		};
+		n
+	};
+
+loadClassFromFile =
+	fun(url,name)
+	{
+		globalvar loadedClasses;
+		if( loadedClasses )
+		{
+			val res = loadedClasses[name];
+			if( res ) {return res};
+		}
+		else
+		{
+			loadedClasses = makeHashMap();
+		};
+		url = new "java.io.File"(("java.lang.String")url);
+		url = ("java.io.File")url.#toURI();
+		url = ("java.net.URI")url.#toURL();
+		val urls = new "java.net.URL"[1];
+		urls[0] = url;
+		val cl = new "java.net.URLClassLoader"(("java.net.URL[]")urls);
+		val cls = "java.lang.Class".##forName(("java.lang.String")name,("boolean")true,("java.lang.ClassLoader")cl);
+		loadedClasses[name] = ("java.lang.Class")cls.#newInstance();
+	};
+
+sqlGetDriver =
+	fun(url,name)
+	{
+		globalvar sqlDrivers;
+		if( sqlDrivers )
+		{
+			val res = sqlDrivers[name];
+			if( res ) {return res};
+		}
+		else
+		{
+			sqlDrivers = makeHashMap();
+		};
+		try
+		{
+			val res = sqlGetDriver(name);
+			sqlDrivers[name] = res;
+			return res;
+		}
+		catch e {};  ;;; Fall through
+		sqlDrivers[name] = loadClassFromFile(url,name);
+	};
+
+sqlGetDriver =
+	fun(name)
+	{
+		val cls = "java.lang.Class".##forName(("java.lang.String")name);
+		("java.lang.Class")cls.#newInstance();
+	};
+
+sqlGetConnectionFromDriver =
+	fun(driver,url,props)
+	{
+		if( !props )
+		{
+			props = new "java.util.Properties"()
+		}
+		elsif( isPair(props) )
+		{
+			val newProps = new "java.util.Properties"();
+			while( props )
+			{
+				val pair = head(props);
+				props = tail(props);
+				("java.util.Properties")newProps.#setProperty
+					( ("java.lang.String")car(pair)
+					, ("java.lang.String")cadr(pair)
+					);
+			};
+			props = newProps;
+		};
+		("java.sql.Driver")driver.#connect(("java.lang.String")url,("java.util.Properties")props);
+	};
+
+sqlGetConnectionFromDriver =
+	fun(driver,url)
+	{
+		sqlGetConnectionFromDriver(driver,url,null);
+	};
+
+sqlGetConnection =
+	fun(url,props)
+	{
+		if( !props )
+		{
+			props = new "java.util.Properties"()
+		}
+		elsif( isPair(props) )
+		{
+			val newProps = new "java.util.Properties"();
+			while( props )
+			{
+				val pair = head(props);
+				props = tail(props);
+				("java.util.Properties")newProps.#setProperty
+					( ("java.lang.String")car(pair)
+					, ("java.lang.String")cadr(pair)
+					);
+			};
+			props = newProps;
+		};
+		"java.sql.DriverManager".##getConnection(("java.lang.String")url,("java.util.Properties")props);
+	};
+
+sqlGetConnection =
+	fun(url)
+	{
+		sqlGetConnection(url,null);
+	};
+
+sqlCreateStatement =
+	fun(conn)
+	{
+		("java.sql.Connection")conn.#createStatement();
+	};
+
+sqlPrepareStatement =
+	fun(conn,cmd)
+	{
+		("java.sql.Connection")conn.#prepareStatement(("java.lang.String")cmd);
+	};
+
+sqlExecuteUpdate =
+	fun(stmt,cmd)
+	{
+		if( isInstanceOf("java.sql.PreparedStatement",stmt) )
+		{
+			sqlExecutePreparedUpdate(stmt,cmd);
+		}
+		elsif( isInstanceOf("java.sql.Statement",stmt) )
+		{
+			("java.sql.Statement")stmt.#executeUpdate(("java.lang.String")cmd);
+		}
+		elsif( isInstanceOf("java.sql.Connection",stmt) )
+		{
+			val conn = stmt;
+			stmt = sqlCreateStatement(conn);
+			("java.sql.Statement")stmt.#executeUpdate(("java.lang.String")cmd);
+			sqlClose(stmt);
+		}
+	};
+
+sqlExecutePreparedUpdate =
+	fun(pstmt,args)
+	{
+		var n=0;
+		while( args )
+		{
+			n = inc(n);
+			("java.sql.PreparedStatement")pstmt.#setObject(("int")n,("java.lang.Object")head(args));
+			args = tail(args);
+		};
+		("java.sql.PreparedStatement")pstmt.#executeUpdate();
+	};
+
+sqlExecuteQuery =
+	fun(stmt,cmd)
+	{
+		("java.sql.Statement")stmt.#executeQuery(("java.lang.String")cmd);
+	};
+
+sqlExecutePreparedQuery =
+	fun(pstmt,args)
+	{
+		var n=0;
+		while( args )
+		{
+			n = inc(n);
+			("java.sql.PreparedStatement")pstmt.#setObject(("int")n,("java.lang.Object")head(args));
+			args = tail(args);
+		};
+		("java.sql.PreparedStatement")pstmt.#executeQuery();
+	};
+
+sqlNext =
+	fun(rs)
+	{
+		("java.sql.ResultSet")rs.#next()
+	};
+
+sqlGetObject =
+	fun(rs,col)
+	{
+		if( isInstanceOf("java.lang.String",col) )
+		{
+			("java.sql.ResultSet")rs.#getObject(("java.lang.String")col);
+		}
+		else
+		{
+			("java.sql.ResultSet")rs.#getObject((int)int(col));
+		};
+	};
+
+sqlSetAutoCommit =
+	fun(conn,flag)
+	{
+		("java.sql.Connection")conn.#setAutoCommit(("boolean")flag);		
+	};
+
+sqlCommit =
+	fun(conn)
+	{
+		("java.sql.Connection")conn.#commit();		
+	};
+
+sqlRollback =
+	fun(conn)
+	{
+		("java.sql.Connection")conn.#rollback();		
+	};
+
+sqlClose =
+	fun(s)
+	{
+		if( isInstanceOf("java.sql.ResultSet",s) )
+		{
+			("java.sql.ResultSet")s.#close();
+		}
+		elsif( isInstanceOf("java.sql.Statement",s) )
+		{
+			("java.sql.Statement")s.#close();
+		}
+		elsif( isInstanceOf("java.sql.Connection",s) )
+		{
+			("java.sql.Connection")s.#close();
+		}
+	};
+
+sqlForAll_fromResultSet_do =
+	fun(@x,rs,@b)
+	{
+		while( sqlNext(rs) )
+		{
+			x = sqlGetObject(rs,1);
+			b;
+		};
+		sqlClose(rs);
+	};
+
+sqlForAll_fromQuery__do =
+	fun(@x,stmt,query,@b)
+	{
+		val rs = sqlExecuteQuery(stmt,query);
+		var created = false;
+		if( isInstanceOf("java.sql.Connection",stmt) )
+		{
+			stmt = sqlCreateStatement(stmt);
+			created = true;
+		};
+		while( sqlNext(rs) )
+		{
+			x = sqlGetObject(rs,1);
+			b;
+		};
+		sqlClose(rs);
+		if( created ) {sqlClose(stmt)};
+	};
+
+sqlForAllRows_fromResultSet_do =
+	fun(@row,rs,@b)
+	{
+		val meta = ("java.sql.ResultSet")rs.#getMetaData();
+		val count = ("java.sql.ResultSetMetaData")meta.#getColumnCount();
+		row = makeArray(count);
+		while( sqlNext(rs) )
+		{
+			for( var i=0 ; i!=count ; i=inc(i) )
+			{
+				row[i] = sqlGetObject(rs,inc(i));
+			};
+			b;
+		};
+		sqlClose(rs);
+	};
+
+sqlForAllRows_fromQuery__do =
+	fun(@row,stmt,query,@b)
+	{
+		var created = false;
+		if( isInstanceOf("java.sql.Connection",stmt) )
+		{
+			stmt = sqlCreateStatement(stmt);
+			created = true;
+		};
+		val rs = sqlExecuteQuery(stmt,query);
+		val meta = ("java.sql.ResultSet")rs.#getMetaData();
+		val count = ("java.sql.ResultSetMetaData")meta.#getColumnCount();
+		row = makeArray(count);
+		while( sqlNext(rs) )
+		{
+			for( var i=0 ; i!=count ; i=inc(i) )
+			{
+				row[i] = sqlGetObject(rs,inc(i));
+			};
+			b;
+		};
+		sqlClose(rs);
+		if( created ) {sqlClose(stmt)};
+	};
+
+sqlForAll_fromPreparedQuery__do =
+	fun(@x,query,args,@b)
+	{
+		val rs = sqlExecutePreparedQuery(query,args);
+		while( sqlNext(rs) )
+		{
+			x = sqlGetObject(rs,1);
+			b;
+		};
+		sqlClose(rs);
+	};
+
+sqlForAll__fromPreparedQuery__do =
+	fun(@x,@y,query,args,@b)
+	{
+		val rs = sqlExecutePreparedQuery(query,args);
+		while( sqlNext(rs) )
+		{
+			x = sqlGetObject(rs,1);
+			y = sqlGetObject(rs,2);
+			b;
+		};
+		sqlClose(rs);
+	};
+
+sqlForAll___fromPreparedQuery__do =
+	fun(@x,@y,@z,query,args,@b)
+	{
+		val rs = sqlExecutePreparedQuery(query,args);
+		while( sqlNext(rs) )
+		{
+			x = sqlGetObject(rs,1);
+			y = sqlGetObject(rs,2);
+			z = sqlGetObject(rs,3);
+			b;
+		};
+		sqlClose(rs);
+	};
+
+sqlForAll____fromPreparedQuery__do =
+	fun(@x,@y,@z,@t,query,args,@b)
+	{
+		val rs = sqlExecutePreparedQuery(query,args);
+		while( sqlNext(rs) )
+		{
+			x = sqlGetObject(rs,1);
+			y = sqlGetObject(rs,2);
+			z = sqlGetObject(rs,3);
+			t = sqlGetObject(rs,4);
+			b;
+		};
+		sqlClose(rs);
+	};
+
+sqlForAll____fromPreparedQuery_do =
+	fun(@x,@y,@z,@t,query,@b)
+	{
+		sqlForAll____fromPreparedQuery__do(@x,@y,@z,@t,query,[],@b);
+	};
+
+sqlForAll___fromPreparedQuery_do =
+	fun(@x,@y,@z,query,@b)
+	{
+		sqlForAll___fromPreparedQuery__do(@x,@y,@z,query,[],@b);
+	};
+
+sqlForAll__fromPreparedQuery_do =
+	fun(@x,@y,query,@b)
+	{
+		sqlForAll__fromPreparedQuery__do(@x,@y,query,[],@b);
+	};
+
+sqlForAll_fromPreparedQuery_do =
+	fun(@x,query,@b)
+	{
+		sqlForAll_fromPreparedQuery__do(@x,query,[],@b);
+	};
+
+sqlForAllRows_fromPreparedQuery__do =
+	fun(@row,query,args,@b)
+	{
+		val rs = sqlExecutePreparedQuery(query,args);
+		val meta = ("java.sql.ResultSet")rs.#getMetaData();
+		val count = ("java.sql.ResultSetMetaData")meta.#getColumnCount();
+		row = makeArray(count);
+		while( sqlNext(rs) )
+		{
+			for( var i=0 ; i!=count ; i=inc(i) )
+			{
+				row[i] = sqlGetObject(rs,inc(i));
+			};
+			b;
+		};
+		sqlClose(rs);
+	};
+
+sqlForAllRows_fromPreparedQuery_do =
+	fun(@row,query,@b)
+	{
+		sqlForAllRows_fromPreparedQuery__do(@row,query,[],@b);
+	};
+	
+sqlForAll__fromResultSet_do =
+	fun(@x,@y,rs,@b)
+	{
+		while( sqlNext(rs) )
+		{
+			x = sqlGetObject(rs,1);
+			y = sqlGetObject(rs,2);
+			b;
+		};
+		sqlClose(rs);
+	};
+
+sqlForAll__fromQuery__do =
+	fun(@x,@y,stmt,query,@b)
+	{
+		var created = false;
+		if( isInstanceOf("java.sql.Connection",stmt) )
+		{
+			stmt = sqlCreateStatement(stmt);
+			created = true;
+		};
+		val rs = sqlExecuteQuery(stmt,query);
+		while( sqlNext(rs) )
+		{
+			x = sqlGetObject(rs,1);
+			y = sqlGetObject(rs,2);
+			b;
+		};
+		sqlClose(rs);
+		if( created ) {sqlClose(stmt)};
+	};
+
+sqlForAll___fromResultSet_do =
+	fun(@x,@y,@z,rs,@b)
+	{
+		while( sqlNext(rs) )
+		{
+			x = sqlGetObject(rs,1);
+			y = sqlGetObject(rs,2);
+			z = sqlGetObject(rs,3);
+			b;
+		};
+		sqlClose(rs);
+	};
+
+sqlForAll___fromQuery__do =
+	fun(@x,@y,@z,stmt,query,@b)
+	{
+		var created = false;
+		if( isInstanceOf("java.sql.Connection",stmt) )
+		{
+			stmt = sqlCreateStatement(stmt);
+			created = true;
+		};
+		val rs = sqlExecuteQuery(stmt,query);
+		while( sqlNext(rs) )
+		{
+			x = sqlGetObject(rs,1);
+			y = sqlGetObject(rs,2);
+			z = sqlGetObject(rs,3);
+			b;
+		};
+		sqlClose(rs);
+	};
+
+sqlForAll____fromResultSet_do =
+	fun(@x,@y,@z,@t,rs,@b)
+	{
+		while( sqlNext(rs) )
+		{
+			x = sqlGetObject(rs,1);
+			y = sqlGetObject(rs,2);
+			z = sqlGetObject(rs,3);
+			t = sqlGetObject(rs,4);
+			b;
+		};
+		sqlClose(rs);
+	};
+
+sqlForAll____fromQuery__do =
+	fun(@x,@y,@z,@t,stmt,query,@b)
+	{
+		var created = false;
+		if( isInstanceOf("java.sql.Connection",stmt) )
+		{
+			stmt = sqlCreateStatement(stmt);
+			created = true;
+		};
+		val rs = sqlExecuteQuery(stmt,query);
+		while( sqlNext(rs) )
+		{
+			x = sqlGetObject(rs,1);
+			y = sqlGetObject(rs,2);
+			z = sqlGetObject(rs,3);
+			t = sqlGetObject(rs,4);
+			b;
+		};
+		sqlClose(rs);
+		if( created ) {sqlClose(stmt)};
+	};
+
+with =
+	fun(@x,@b)
+	{
+		b
+	};
+
+#"makeCondition[f1]" = builtin(MAKECONDITION);
+#"awaitCondition[f1]" = builtin(WAITCONDITION);
+#"signalCondition[f1]" = builtin(SIGNALCONDITION);
+#"+[f2]" = builtin(ADD);
+#"++[f2]" = builtin(CONCAT);
+#"-[f2]" = builtin(SUB);
+#"-[f1]" = builtin(NEG);
+#"*[f2]" = builtin(MUL);
+#"/[f2]" = builtin(DIV);
+#"==[f2]" = builtin(EQ);
+#"!=[f2]" = builtin(NE);
+#"<[f2]" = builtin(LT);
+#">[f2]" = builtin(GT);
+#"<=[f2]" = builtin(LE);
+#">=[f2]" = builtin(GE);
+#"eq[f2]" = builtin(SAME);
+#"%[f2]" = builtin(MOD);
+#"makeFiber[f1]" = builtin(MAKEFIBER);
+#"transfer[f3]" = builtin(TRANSFER);
+#"?[?][f2]" = builtin(ARRAYGET);
+#"?[?]=?[f3]" = builtin(ARRAYPUT);
+#"makeHashMap[f0]" = builtin(MAKEHASHMAP);
+#"makeArray[f1]" = builtin(MAKEARRAY);
+#"arrayLength[f1]" = builtin(ARRAYLENGTH);
+#"isArray[f1]" = builtin(ISARRAY);
+#"isHashMap[f1]" = builtin(ISHASHMAP);
+#":[f2]" = builtin(CONS);
+#"head[f1]" = builtin(HEAD);
+#"tail[f1]" = builtin(TAIL);
+#"isPair[f1]" = builtin(ISPAIR);
+#"isString[f1]" = builtin(ISSTRING);
+#"isChar[f1]" = builtin(ISCHAR);
+#"isBoolean[f1]" = builtin(ISBOOLEAN);
+#"isDouble[f1]" = builtin(ISDOUBLE);
+#"isByte[f1]" = builtin(ISBYTE);
+#"isShort[f1]" = builtin(ISSHORT);
+#"isInteger[f1]" = builtin(ISINTEGER);
+#"isLong[f1]" = builtin(ISLONG);
+#"isBigInteger[f1]" = builtin(ISBIGINTEGER);
+#"setHead[f2]" = builtin(SETHEAD);
+#"setTail[f2]" = builtin(SETTAIL);
+#"makechan[f0]" = builtin(MAKECHANNEL);
+#"makeChannel[f0]" = builtin(MAKECHANNEL);
+#"<-[f2]" = builtin(CHANNELWRITE);
+#"<-[f1]" = builtin(CHANNELREAD);
+#"canReadChannel[f1]" = builtin(CANREADCHANNEL);
+#"canWriteChannel[f1]" = builtin(CANWRITECHANNEL);
+closeChannel =
+	fun(c)
+	{
+		c <- channelEOF();
+		flushChannel(c);
+	};
+#"isChannelClosed[f1]" = builtin(ISCHANNELCLOSED);
+parseInt =
+	fun(s)
+	{
+		"java.lang.Integer".##parseInt(("java.lang.String")s)
+	};
+parseLong =
+	fun(s)
+	{
+		"java.lang.Long".##parseLong(("java.lang.String")s)
+	};
+go = fun goTask(b);
+goFiber =
+	fun(@b)
+	{
+		startFiber(fun(){b});
+	};
+goTask =
+	fun(@b)
+	{
+		startTask(fun(){b});
+	};
+goMachine =
+	fun(n,@b)
+	{
+		startMachine(fun(){b},n);
+	};
+#"makeBufferedChannel[f1]" = builtin(MAKEBUFFEREDCHANNEL);
+#"flushChannel[f1]" = builtin(CHANNELFLUSH);
+;;;#"className[f1]" = builtin(CLASSNAME);
+;;;#"findMethod[f3]" = builtin(FINDMETHOD);
+;;;#"findField[f2]" = builtin(FINDFIELD);
+;;;#"findClass[f1]" = builtin(FINDCLASS);
+;;;#"getField[f2]" = builtin(GETFIELD);
+;;;#"setField[f3]" = builtin(SETFIELD);
+;;;#"invokeMethod[f3]" = builtin(INVOKEMETHOD);
+;;;#"makeObject[f2]" = builtin(MAKEOBJECT);
+;;;#"findConstructor[f2]" = builtin(FINDCONSTRUCTOR);
+#"isInstanceOf[f2]" = builtin(ISINSTANCEOF);
+isThunk =
+	fun(x)
+	{
+		isInstanceOf("is.hi.cs.morpho.Thunk",x)
+	};
+#"isArrayClass[f1]" = builtin(ISARRAYCLASS);
+;;;#"makeArrayOfClass[f2]" = builtin(MAKEARRAYOFCLASS);
+;;;#"classOf[f1]" = builtin(CLASSOF);
+#"arrayGet[f2]" = builtin(JAVA_ARRAYGET);
+#"arraySet[f3]" = builtin(JAVA_ARRAYPUT);
+#"arrayPut[f3]" = builtin(JAVA_ARRAYPUT);
+#"byte[f1]" = builtin(BYTE);
+#"short[f1]" = builtin(SHORT);
+#"char[f1]" = builtin(CHAR);
+#"int[f1]" = builtin(INT);
+#"long[f1]" = builtin(LONG);
+#"bigInteger[f1]" = builtin(BIGINTEGER);
+#"double[f1]" = builtin(DOUBLE);
+#"exit[f1]" = builtin(EXIT);
+#"suspend[f0]" = builtin(KILLFIBER);
+
+#"makeReady[f1]" = builtin(MAKEFIBERREADY);
+#"makeReadyWithValue[f2]" = builtin(MAKEFIBERREADYWITHVALUE);
+#"makeFiberReady[f1]" = builtin(MAKEFIBERREADY);
+#"makeFiberReadyWithValue[f2]" = builtin(MAKEFIBERREADYWITHVALUE);
+#"forkSuspendedFiber[f2]" = builtin(FORKSUSPENDEDFIBER);
+
+#"getArgs[f0]" = builtin(GETARGS);
+#"inc[f1]" = builtin(INC);
+#"dec[f1]" = builtin(DEC);
+#"random[f1]" = builtin(RANDOM);
+;;;#"getCode[f0]" = builtin(GETCODE);
+
+#"||[f2]" =
+	[
+	(Fetch 0)
+	(GoTrue _1000)
+	(FetchR 1)
+_1000:
+	(Return)
+	];
+
+#"&&[f2]" =
+	[
+	(Fetch 0)
+	(GoFalse _2000)
+	(FetchR 1)
+_2000:
+	(Return)
+	];
+
+#"![f1]" =
+	[
+	(Fetch 0)
+	(NotR)
+	];
+
+#"sleep[f1]" = builtin(SLEEP);
+
+#"makePromise[f1]" =
+	[
+	(Fetch 0)
+	(New1 "is.hi.cs.morpho.Promise" "is.hi.cs.morpho.Closure")
+	(Return)
+	];
+
+;;; New
+isPromise =
+	fun(p)
+	{
+		if( p==[] ) {return false};
+		val c = ("java.lang.Object")p.#getClass();
+		("java.lang.Class")c.#getName() == "is.hi.cs.morpho.Promise"
+	};
+
+#"force[f1]" = builtin(FORCE);
+
+;;; New
+streamFromByTo =
+	fun(i,d,e)
+	{
+		if( i>e ) {return []};
+		#[i$streamFromByTo(i+d,d,e)]
+	};
+
+;;; New######
+forAll_inList_do =
+	fun(@x,l,@b)
+	{
+		while( l )
+		{
+			x = head(l);
+			l = tail(l);
+			b
+		};
+	};
+
+;;; New######
+forAll_inStream_do =
+	fun(@x,s,@b)
+	{
+		while( s )
+		{
+			x = streamHead(s);
+			s = streamTail(s);
+			b
+		};
+	};
+
+;;; New######
+forAll_inChannel_do =
+	fun(@x,c,@b)
+	{
+		var tmp = <- c;
+		while( !isChannelEOF(tmp) )
+		{
+			x = tmp;
+			b;
+			tmp = <- c;
+		};
+	};
+
+forAllKeys_inMap_do =
+	fun(@k,m,@b)
+	{
+		val keyset = ("java.util.Map")m.#keySet();
+		val iter = ("java.util.Set")keyset.#iterator();
+		while( ("java.util.Iterator")iter.#hasNext() )
+		{
+			k = ("java.util.Iterator")iter.#next();
+			b
+		};
+	};
+
+{;;;
+;;; New
+listAll =
+	fun(@i,@f,@s)
+	{
+		var res, last;
+		var tmp, z = f;
+		if( !generalHasNext(z) ) {return []};
+		tmp = generalNext(z);
+		if( isChannelEOF(tmp) ) {return []};
+		i = tmp;
+		tmp = s;
+		res = last = [tmp];
+		for( ; generalHasNext(z) ; z=generalAdvance(z) )
+		{
+			tmp = generalNext(z);
+			if( isChannelEOF(tmp) ) {break []};
+			i = tmp;
+			tmp = s;
+			setTail(last,last=[tmp]);
+		};
+		res	
+	};
+;;;}
+
+{;;;
+;;; New
+generalHasNext =
+	fun(f)
+	{
+		if( isPair(f) ) {return true};
+		if( f==[] ) {return false};
+		!isChannelClosed(f)
+	};
+
+;;; New
+generalNext =
+	fun(f)
+	{
+		if( isPair(f) ) {return head(f)};
+		<- f
+	};
+
+;;; New
+generalAdvance =
+	fun(f)
+	{
+		if( isPair(f) )
+		{
+			f = tail(f);
+			if( isPromise(f) ) { f = force(f) };
+		};
+		f
+	};
+;;;}
+
+;;; New
+{;;;
+listFromByTo =
+	fun(i,d,e)
+	{
+		var x;
+		listAll(@x,@streamFromByTo(i,d,e),@x)
+	};
+;;;}
+
+;;; New
+channelFromByTo =
+	fun(i,d,e)
+	{
+		var c = makeChannel();
+		startFiber(
+			fun()
+			{
+				var k = i;
+				for(;;)
+				{
+					if( k>e ) {break []};
+					c <- k;
+					k = k+d;
+				};
+				closeChannel(c);
+			}
+		);
+		c;
+	};
+
+printExceptionTrace =
+	fun(eref)
+	{
+		if( isInstanceOf( "java.lang.Class".##forName(("java.lang.String")"java.lang.Throwable"), *eref ) )
+		{
+			writeln(("java.lang.Throwable")(*eref).#printStackTrace());
+		}
+		else
+		{
+			writeln(*eref);
+		};
+		var c = getExceptionTrace(eref);
+		var first = true;
+		while( c )
+		{
+			val pc = ("is.hi.cs.morpho.Continuation")c.#pc;
+			val code = ("is.hi.cs.morpho.Continuation")c.#code;
+			val functiontype = ("is.hi.cs.morpho.Function")code.#getFunctionType(("int")int(pc));
+			val filename = ("is.hi.cs.morpho.Function")code.#getFilename(("int")int(pc));
+			val functionname = ("is.hi.cs.morpho.Function")code.#getFunctionOrMethod(("int")int(pc));
+			if( !filename ) {break [];};
+			val start = ("is.hi.cs.morpho.Function")code.#getStartFileLine(("int")int(pc));
+			val end = ("is.hi.cs.morpho.Function")code.#getEndFileLine(("int")int(pc));
+			var mesg;
+			if( first )
+			{
+				mesg = "In "++functiontype++" "++functionname++" in file \""++filename;
+				first = false;
+			}
+			else
+			{
+				mesg = "Returning to "++functionname++" in file \""++filename;
+			};
+			if( start==end )
+			{
+				mesg = mesg ++ "\", line "++start;
+			}
+			else
+			{
+				mesg = mesg ++ "\", lines "++start++" to "++end;
+			};
+			writeln(mesg);
+			c = ("is.hi.cs.morpho.Continuation")c.#ret;
+		};
+	};
+
+writeln =
+	fun(x)
+	{
+		write(x); writeln(); x;
+	};
+
+write =
+	fun(x)
+	{
+		var tailx=x;
+		if( !isPair(x) )
+		{
+			lowWrite(x);
+			return x;
+		};
+		lowWrite("[");
+		while( isPair(tailx) )
+		{
+			write(head(tailx));
+			tailx = tail(tailx);
+			if( isPair(tailx) )
+			{
+				lowWrite(",");
+			};
+		};
+		if( tailx==[] )
+		{
+			lowWrite("]");
+		}
+		else
+		{
+			lowWrite(" $ "); write(tailx); lowWrite("]");
+		};
+		x;
+	};
+
+startMachine =
+	fun(f,n)
+	{
+		val inner =
+			fun()
+			{
+				try
+				{
+					f();
+					killMachine();
+				}
+				catch e
+				{
+					writeln("Exception in machine: "++e);
+					printExceptionTrace(&e);
+				}
+			};
+		lowStartMachine(inner,n);
+	};
+
+startMachine =
+	fun(f,x,n)
+	{
+		startMachine(fun(){f(x)},n);
+	};
+
+startTask =
+	fun(f)
+	{
+		val inner =
+			fun()
+			{
+				try
+				{
+					f();
+					killTask();
+				}
+				catch e
+				{
+					writeln("Exception in task: "++e);
+					printExceptionTrace(&e);
+				}
+			};
+		lowStartTask(inner);
+	};
+
+startTask =
+	fun(f,x)
+	{
+		startTask(fun(){f(x)});
+	};
+
+#"yieldTask[f0]" = builtin(YIELDTASK);
+#"yieldFiber[f0]" = builtin(YIELDFIBER);
+#"forkFiber[f0]" = builtin(FORKFIBER);
+#"forkTask[f0]" = builtin(FORKTASK);
+#"forkMachine[f1]" = builtin(FORKMACHINE);
+#"killFiber[f0]" = builtin(KILLFIBER);
+#"killTask[f0]" = builtin(KILLTASK);
+#"killMachine[f0]" = builtin(KILLMACHINE);
+#"die[f0]" = builtin(KILLFIBER);
+#"trace[f0]" = builtin(TRACE0);
+#"trace[f1]" = builtin(TRACE1);
+
+makeFiber =
+	fun(f,x)
+	{
+		makeFiber(fun(){f(x)});
+	};
+
+print =
+	fun(x)
+	{
+		if( x==null ) {x="null"};
+		x = ("java.lang.Object")x.#toString();
+		("java.io.PrintStream")("java.lang.System".##out).#print(("java.lang.String")x);
+	};
+
+println =
+	fun()
+	{
+		("java.io.PrintStream")("java.lang.System".##out).#println();
+	};
+
+println =
+	fun(x)
+	{
+		print(x); println();
+	};
+
+#"getExceptionTrace[f1]" = builtin(GETEXCEPTIONTRACE);
+#"applyClosure[f2]" = builtin(APPLYCLOSURE);
+#"streamHead[f1]" = builtin(HEAD);
+
+#"streamTail[f1]" = builtin(STREAMTAIL);
+;;;streamTail = fun(x) {force(tail(x))};
+
+
+;;;memoize = fun makePromise(f);
+
+>>= =
+	fun(s,f)
+	{
+		streamConcatMap(f,s);
+	};
+
+yield =
+	fun(x)
+	{
+		#[ x $ [] ];
+	};
+
+streamConcatMap =
+	fun(f,s)
+	{
+		streamConcat(streamMap(f,s));
+	};
+
+streamConcat =
+	fun(ss)
+	{
+		ss==#[] && (return #[]);
+		streamAppend(streamHead(ss),$streamConcat(streamTail(ss)));
+	};
+
+streamAppend =
+	fun(s1,s2f)
+	{
+		s1==#[] && (return force(s2f));
+		#[ streamHead(s1) $ streamAppend(streamTail(s1),s2f) ];
+	};
+
+streamMap =
+	fun(f,s)
+	{
+		s==#[] && (return #[]);
+		#[ f(streamHead(s)) $ streamMap(f,streamTail(s)) ];
+	};
+
+from =
+	fun(i)
+	{
+		#[ i $ from(i+1) ];
+	};
+
+;;; New
+fromBy =
+	fun(i,d)
+	{
+		#[ i $ fromBy(i+d,d) ];
+	};
+
+;;; New
+fromByUpTo =
+	fun(i,d,n)
+	{
+		if( i>n ) { return #[] };
+		#[ i $ fromByUpTo(i+d,d,n) ]
+	};
+
+;;; New
+take =
+	fun(n,s)
+	{
+		if( n==0 ) { return [] };
+		streamHead(s) : take(dec(n),streamTail(s))
+	};
+
+;;; New
+filterStream =
+	fun(p,s)
+	{
+		if( s==#[] ) { return #[] };
+		val x = streamHead(s);
+		if( p(x) ) { return #[x$filterStream(p,streamTail(s))] };
+		filterStream(p,streamTail(s))
+	};
+
+;;; New
+filterList =
+	fun(p,s)
+	{
+		for(;;)
+		{
+			if( !s ) {return []};
+			if( p(head(s)) ) {break null};
+			s = tail(s);
+		};
+		val start = [head(s)];
+		var last = start;
+		s = tail(s);
+		while( s )
+		{
+			val x = head(s);
+			s = tail(s);
+			if( p(x) )
+			{
+				val tmp = [x];
+				setTail(last,tmp);
+				last = tmp;
+			};
+		};
+		start
+	};
+
+fromUpTo =
+	fun(i,n)
+	{
+		if( i>n ) { return #[] };
+		#[ i $ fromUpTo(i+1,n) ]
+	};
+
+listToStream =
+	fun(x)
+	{
+		x==[] && (return #[]);
+		#[ head(x) $ listToStream(tail(x)) ];
+	};
+
+streamToList =
+	fun(x)
+	{
+		x==#[] && (return []);
+		streamHead(x) : streamToList(streamTail(x));
+	};
+
+isChannelEOF =
+	fun(x)
+	{
+		"is.hi.cs.morpho.Channel".##isEOF(("java.lang.Object")x);
+	};
+
+Byte =
+	fun(x)
+	{
+		"ikvm.lang.CIL".##box_byte(("byte")byte(x));
+	};
+
+Int16 =
+	fun(x)
+	{
+		"ikvm.lang.CIL".##box_short(("short")short(x));
+	};
+
+Int32 =
+	fun(x)
+	{
+		"ikvm.lang.CIL".##box_int(("int")int(x));
+	};
+
+Int64 =
+	fun(x)
+	{
+		"ikvm.lang.CIL".##box_long(("long")long(x));
+	};
+
+Char =
+	fun(x)
+	{
+		"ikvm.lang.CIL".##box_char(("char")char(x));
+	};
+
+Boolean =
+	fun(x)
+	{
+		"ikvm.lang.CIL".##box_boolean(("boolean")x);
+	};
+
+{;;;
+Single =
+	fun(x)
+	{
+		"ikvm.lang.CIL".##box_float(("float")float(x));
+	};
+;;;}
+
+Double =
+	fun(x)
+	{
+		"ikvm.lang.CIL".##box_double(("double")double(x));
+	};
+
+boolean =
+	fun(x)
+	{
+		"ikvm.lang.CIL".##unbox_boolean(("java.lang.Object")x);
+	};
+
+?? =
+	fun(x,y)
+	{
+		x!=null && (return x);
+		y;
+	};
+
+;;; New
+max =
+	fun(x,y)
+	{
+		"java.lang.Math".##max(("double")x,("double")y);
+	};
+
+min =
+	fun(x,y)
+	{
+		"java.lang.Math".##min(("double")x,("double")x);
+	};
+
+abs =
+	fun(x)
+	{
+		"java.lang.Math".##abs(("double")x);
+	};
+
+acos =
+	fun(x)
+	{
+		"java.lang.Math".##acos(("double")x);
+	};
+
+asin =
+	fun(x)
+	{
+		"java.lang.Math".##asin(("double")x);
+	};
+
+sin =
+	fun(x)
+	{
+		"java.lang.Math".##sin(("double")x);
+	};
+
+cos =
+	fun(x)
+	{
+		"java.lang.Math".##cos(("double")x);
+	};
+
+tan =
+	fun(x)
+	{
+		"java.lang.Math".##tan(("double")x);
+	};
+
+atan =
+	fun(x)
+	{
+		"java.lang.Math".##atan(("double")x);
+	};
+
+atan =
+	fun(x,y)
+	{
+		"java.lang.Math".##atan2(("double")x,("double")y);
+	};
+
+atan2 =
+	fun(x,y)
+	{
+		"java.lang.Math".##atan2(("double")x,("double")y);
+	};
+
+exp =
+	fun(x)
+	{
+		"java.lang.Math".##exp(("double")x);
+	};
+
+log =
+	fun(x)
+	{
+		"java.lang.Math".##log(("double")x);
+	};
+
+log10 =
+	fun(x)
+	{
+		"java.lang.Math".##log10(("double")x);
+	};
+
+log1p =
+	fun(x)
+	{
+		"java.lang.Math".##log1p(("double")x);
+	};
+
+expm1 =
+	fun(x)
+	{
+		"java.lang.Math".##expm1(("double")x);
+	};
+
+sqrt =
+	fun(x)
+	{
+		"java.lang.Math".##sqrt(("double")x);
+	};
+
+hypot =
+	fun(x,y)
+	{
+		"java.lang.Math".##hypot(("double")x,("double")y);
+	};
+
+cbrt =
+	fun(x)
+	{
+		"java.lang.Math".##cbrt(("double")x);
+	};
+
+: =
+	fun(x)
+	{
+		writeln(x);
+	};
+
+match =
+	fun(p,v)
+	{
+		var res;
+		for(;;)
+		{
+			res = "is.hi.cs.morpho.Builtins".##match(("java.lang.Object")p,("java.lang.Object")v);
+			isBoolean(res) && (return res);
+			force(res);
+		};
+	};
+
+#"getTask[f0]" = builtin(GETTASK);
+
+getReturnContinuation =
+	fun()
+	{
+		val c = ("is.hi.cs.morpho.Task")(getTask()).#getReturnContinuation();
+		("is.hi.cs.morpho.Continuation")c.#ret;
+	};
+
+makeMutex = fun(){new "is.hi.cs.morpho.Mutex"()};
+#"acquireMutex[f1]" = builtin(ACQUIREMUTEX);
+#"releaseMutex[f1]" = builtin(RELEASEMUTEX);
+
+#"car[f1]" = builtin(HEAD);
+#"cdr[f1]" = builtin(TAIL);
+#"caar[f1]" = builtin(CAAR);
+#"cdar[f1]" = builtin(CDAR);
+#"cadr[f1]" = builtin(CADR);
+#"cddr[f1]" = builtin(CDDR);
+#"caaar[f1]" = builtin(CAAAR);
+#"cdaar[f1]" = builtin(CDAAR);
+#"cadar[f1]" = builtin(CADAR);
+#"cddar[f1]" = builtin(CDDAR);
+#"caadr[f1]" = builtin(CAADR);
+#"cdadr[f1]" = builtin(CDADR);
+#"caddr[f1]" = builtin(CADDR);
+#"cdddr[f1]" = builtin(CDDDR);
+#"caaaar[f1]" = builtin(CAAAAR);
+#"cdaaar[f1]" = builtin(CDAAAR);
+#"cadaar[f1]" = builtin(CADAAR);
+#"cddaar[f1]" = builtin(CDDAAR);
+#"caadar[f1]" = builtin(CAADAR);
+#"cdadar[f1]" = builtin(CDADAR);
+#"caddar[f1]" = builtin(CADDAR);
+#"cdddar[f1]" = builtin(CDDDAR);
+#"caaadr[f1]" = builtin(CAAADR);
+#"cdaadr[f1]" = builtin(CDAADR);
+#"cadadr[f1]" = builtin(CADADR);
+#"cddadr[f1]" = builtin(CDDADR);
+#"caaddr[f1]" = builtin(CAADDR);
+#"cdaddr[f1]" = builtin(CDADDR);
+#"cadddr[f1]" = builtin(CADDDR);
+#"cddddr[f1]" = builtin(CDDDDR);
+}}
+*
+{{
+#"lowStartTask[f1]" = builtin(STARTTASK);
+#"lowStartMachine[f2]" = builtin(STARTMACHINE);
+}}
+:
+{{
+setOutputChannel =
+	fun(s)
+	{
+		val outputStream = getGlobal("outputChannel");
+		val oldVar = outputStream;
+		setGlobal("outputChannel",s);
+		return oldVar;
+	};
+
+getOutputChannel =
+	fun()
+	{
+		getGlobal("outputChannel");
+	};
+
+lowWrite =
+	fun(x)
+	{
+		val outputStream = getGlobal("outputChannel");
+		if( !outputStream )
+		{
+			lowWrite(x);
+		}
+		else
+		{
+			if( x!=null )
+			{
+				outputStream <- x;
+			}
+			else
+			{
+				outputStream <- "null";
+			};
+		};
+		x;
+	};
+
+writeln =
+	fun()
+	{
+		val outputStream = getGlobal("outputChannel");
+		if( !outputStream )
+		{
+			writeln();
+		}
+		else
+		{
+			outputStream <- "\n";
+		};
+	};
+}}
+*
+{{
+#"lowWrite[f1]" = builtin(WRITE);
+#"writeln[f0]" = builtin(WRITELN);
+
+setGlobal =
+	fun(k,x)
+	{
+		("java.util.HashMap")("is.hi.cs.morpho.Machine".##global).#put(("java.lang.Object")k,("java.lang.Object")x);
+	};
+
+getGlobal =
+	fun(k)
+	{
+		("java.util.HashMap")("is.hi.cs.morpho.Machine".##global).#get(("java.lang.Object")k);
+	};
+}}
+;
+
+hide = - basis ;
+unhide = + basis ;
+
+"hidebasis.mmod" = hide ;
+
+"basis.mmod" = !(unhide:hide:basis);
+
+;;;show "basis.mmod" ;

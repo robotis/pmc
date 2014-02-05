@@ -1,0 +1,49 @@
+Morpho compiler.
+================
+
+Dependancies:
+=============
+
+python-ply - http://www.dabeaz.com/ply/ply.html
+
+Version:
+========
+
+0.1.1
+
+Usage:
+======
+
+	usage: pmc.py [-h] [-v] [-V] [-g] [-S] [-L] [-B] [-q] target
+	
+	positional arguments:
+	  target          morpho file.
+	
+	optional arguments:
+	  -h, --help      show this help message and exit
+	  -v, --version   show program's version number and exit
+	  -V, --verbose   Verbose mode
+	
+	Debugging:
+	  -g, --debug     Debugging information
+	  -S, --scopemap  Scopemap
+	  -L, --lex-only  Run lexer on target
+	  -B, --bnf       Output BNF
+	  -q, --quite     Quite mode
+	  
+License:
+========
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+

@@ -1,0 +1,6 @@
+.pydevproject
+.project
+.settings
+*.pyc
+parser.out
+yacctab.py
