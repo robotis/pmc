@@ -1,6 +1,7 @@
 .pydevproject
 .project
 .settings
+*.mexe
 *.pyc
 parser.out
 yacctab.py

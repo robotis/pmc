@@ -7,6 +7,9 @@ class Base:
     def scope(self):
         return False
     
+    def emit(self):
+        pass
+    
     def __init__(self, tokens):
         self.tokens = tokens
         
