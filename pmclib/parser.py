@@ -15,6 +15,7 @@ from .util import flatten
 from .units.fundecl import Fundecl
 from .units.vardecl import Vardecl
 from .units.expression import Expression
+from .units.listcomp import Listcomp
 
 import logging
 
@@ -194,62 +195,51 @@ class MorphoParser(object):
         p[0] = p[1:]
         
     def p_body(self, p):
-        """body                      : '{' statement_list ';' t_return expr ';' '}'
-                                     | '{' statement_list ';' t_return expr '}'
-                                     | '{' t_return expr ';' '}'
-                                     | '{' t_return expr '}'
-                                     | '{' statement_list ';' '}'
+        """body                      : '{' statement_list ';' '}'
                                      | '{' statement_list '}'
         """
-        if p[2] == 'return':
-            p[0] = [None, p[3]]
-            return
         p[0] = [p[2]]
-        if len(p) > 4 and p[3] == 'return':
-            p[0].append(p[4])
             
     def p_list_expr(self, p):
         """list_expr                 : '[' list_compr_expr ']'
-                                     | '[' list_inner_expr ']'
+                                     | '[' expr ']'
                                      | '[' ']' 
         """
         p[0] = p[1:]
         
-    def p_list_inner_expr(self, p):
-        """list_inner_expr           : exprlist '$' expr
-                                     | exprlist
-        """
-        p[0] = p[1] if len(p) == 2 else p[1:]    
-        
     def p_list_compr_expr(self, p):
-        """list_compr_expr           : expr t_for t_name t_in list_expr list_if
-                                     | expr t_for t_name t_in t_name list_if
-                                     | expr t_for t_name t_in list_expr
-                                     | expr t_for t_name t_in t_name
+        """list_compr_expr           : expr t_for list_if t_in list_expr list_if
+                                     | expr t_for expr t_in list_expr list_if
+                                     | expr t_for list_if t_in t_name list_if
+                                     | expr t_for expr t_in t_name list_if
+                                     | expr t_for list_if t_in list_expr
+                                     | expr t_for expr t_in list_expr
+                                     | expr t_for list_if t_in call_expr
+                                     | expr t_for expr t_in call_expr
+                                     | expr t_for list_if t_in t_name
+                                     | expr t_for expr t_in t_name
         """
-        p[0] = p[1:]
+        p[0] = Listcomp(p)
         
     def p_list_if(self, p):
-        """list_if                   : t_if expr
+        """list_if                   : t_if expr t_else expr
+                                     | t_if expr
         """
         p[0] = p[1:]
     
-    def p_expr_list(self, p):
-        """exprlist                  : exprlist ',' expr
-                                     | expr
-        """
-        p[0] = [p[1]] if len(p) == 2 else p[1] + [p[3]]
-        
     def p_expr(self, p):
         """expr                      : expr '-' expr
                                      | expr '+' expr
                                      | expr '/' expr
                                      | expr '*' expr
                                      | expr '%' expr
+                                     | expr ',' expr
                                      | '-' expr %prec UMINUS
                                      | '(' expr ')'
+                                     | t_return expr
                                      | list_compr_expr
                                      | list_expr
+                                     | call_expr
                                      | literal
         """
         if len(p) == 2:
@@ -259,7 +249,13 @@ class MorphoParser(object):
                 p[0] = p[2]
             else:
                 p[0] = Expression(p)
-        
+                
+    def p_call_expr(self, p):
+        """call_expr                 : t_name '(' expr ')'
+                                     | t_name '(' ')'
+        """
+        p[0] = p[1:]
+                
     def p_literal(self, p):
         """literal                   : t_integer
                                      | t_float

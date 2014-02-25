@@ -1,5 +1,5 @@
 main = 
 	fun()
 	{
-		5 + 5;
+		return [a + 5 for a in [b for b in range(1, 1)]];
 	};
