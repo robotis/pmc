@@ -10,10 +10,6 @@ class Fundecl(Base):
         """
         self.args = p[3]
         self.body = p[5][0]
-        if len(p[5]) == 2:
-            self.retf = p[5][1]
-        else:
-            self.retf = self.body.pop() if self.body else None
         self.name = '<anonymous>'
         
     def emit(self, parser):
@@ -24,23 +20,18 @@ class Fundecl(Base):
         return '\n'.join(p)
     
     def _emit_body(self, p):
-        if not self.body and not self.retf:
+        if not self.body:
             p.append('(MakeValR null)')
             return
         elif self.body:
-            p.extend([unit.emit(self._parser) for unit in self.body])
-        if hasattr(self.retf, 'emit'):
-            p.append(self.retf.emit(self._parser))
-            p.append('(Return)')
-        else:
-            p.append('(MakeValR %s)' % self.retf)
+            for unit in self.body:
+                p.extend([unit.emit(self._parser)])
+        p.extend(['(Return)'])
     
     def __repr__(self):
         r = ['<function> %s <%s>' % (self.name, str(self.args))]
         if self.body:
             for _ in self.body: r.append('\t %s' % _)
-        if self.retf:
-            r.append('\t <return> %s' % self.retf)
         if not self.body and not self.retf:
             r.append('\t<empty>')
         return '\n'.join(r)   

@@ -161,19 +161,19 @@ class MorphoParser(object):
         """vardecl                   : t_var vdecl
                                      | t_val vdecl
         """
-        p[0] = Vardecl(p)
+        p[0] = p[2]
         
     def p_vdecl(self, p):
         """vdecl                     : vdecl ',' vdecl_aux
                                      | vdecl_aux
         """
-        p[0] = p[1:]
+        p[0] = [p[1]] if len(p) == 2 else p[1] + [p[3]]
         
     def p_vdecl_aux(self, p):
         """vdecl_aux                 : t_name '=' expr
                                      | t_name
         """
-        p[0] = p[1] if len(p) == 2 else p[1:]
+        p[0] = Vardecl(p)
         
     def p_fundecl(self, p):
         """fundecl                   : t_fun '(' params ')' body
@@ -198,7 +198,7 @@ class MorphoParser(object):
         """body                      : '{' statement_list ';' '}'
                                      | '{' statement_list '}'
         """
-        p[0] = [p[2]]
+        p[0] = p[2]
             
     def p_list_expr(self, p):
         """list_expr                 : '[' list_compr_expr ']'

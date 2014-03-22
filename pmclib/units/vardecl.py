@@ -8,11 +8,12 @@ class Vardecl(Base):
         """vardecl                   : t_var vdecl
                                      | t_val vdecl
         """
-        self.name = p[2][0][0]
-        self.value = p[2][0][2:]
-        
+        self.name = p[1]
+        self.value = p[2:] if len(p) > 2 else 'null'
+    
     def emit(self, parser):
-        return '(MakeVal %s)' % self.value[0]
+        return '(MakeVal %s)' % 'null'
     
     def __repr__(self):
-        return 'var %s = %s' % (self.name, self.value)
+        return '<var> %s <%s>' % (self.name, self.value)
+    
