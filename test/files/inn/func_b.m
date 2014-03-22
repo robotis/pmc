@@ -1,0 +1,5 @@
+main = 
+	fun()
+	{
+		var a;
+	};

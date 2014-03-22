@@ -1,5 +1,3 @@
-"test.mexe" = main in
-{{
 a = 
 	fun(a, b)
 	{
@@ -12,8 +10,3 @@ main =
 		var c = 12.6, d = -2;
 		c = a / ((b + d) * 5) - c;
 	};
-}}
-*
-BASIS
-;
-
