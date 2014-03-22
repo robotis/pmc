@@ -9,24 +9,43 @@ class Fundecl(Base):
         """fundecl                   : t_fun '(' params ')' body
         """
         self.args = p[3]
-        self.body = p[5][0]
+        self.body = p[5]
         self.name = '<anonymous>'
+        self.scope = {}
+        i = 0
+        for arg in self.args:
+            self.scope[arg] = i
+            i += 1
         
     def emit(self, parser):
         self._parser = parser
         p = ['#"%s[f%d]" =' % (self.name, self.depth), '[']
-        self._emit_body(p)
+        p.extend(self._emit_body(p))
         p.append('];')
         return '\n'.join(p)
     
     def _emit_body(self, p):
-        if not self.body:
-            p.append('(MakeValR null)')
-            return
-        elif self.body:
+        body = []
+        if self.body:
             for unit in self.body:
-                p.extend([unit.emit(self._parser)])
-        p.extend(['(Return)'])
+                e = unit.emit(self)
+                body.extend(e)
+        else:
+            body.append(('Makeval', 'null'))
+        if body:
+            newe = self.mkretEmit(body[-1])
+            if newe: body[-1] = newe
+            else: body.append(('Return', None))
+        return ['(%s %s)' % (e[0], e[1])
+                if e[1] is not None 
+                else '(%s)' % e[0] 
+                for e in body]
+        
+    def mkretEmit(self, emit):
+        e, v = emit
+        if e == 'Push':
+            return ('Return', None)
+        return ("%sR" % e, v)
     
     def __repr__(self):
         r = ['<function> %s <%s>' % (self.name, str(self.args))]

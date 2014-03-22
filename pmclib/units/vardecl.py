@@ -11,8 +11,8 @@ class Vardecl(Base):
         self.name = p[1]
         self.value = p[2:] if len(p) > 2 else 'null'
     
-    def emit(self, parser):
-        return '(MakeVal %s)' % 'null'
+    def emit(self, parent):
+        return [('MakeVal', 'null'), ('Push', None)]
     
     def __repr__(self):
         return '<var> %s <%s>' % (self.name, self.value)

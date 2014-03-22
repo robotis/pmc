@@ -13,6 +13,7 @@ import ply.yacc
 from . import lexer
 from .util import flatten
 from .units.fundecl import Fundecl
+from .units.literal import Literal
 from .units.vardecl import Vardecl
 from .units.expression import Expression
 from .units.listcomp import Listcomp
@@ -147,7 +148,7 @@ class MorphoParser(object):
                                      | vardecl
                                      | expr
         """
-        p[0] = p[1]
+        p[0] = p[1] if type(p[1]) is list else [p[1]]
         
     def p_statements(self, p):
         """statement_list            : statement_list ';' statement
@@ -155,7 +156,7 @@ class MorphoParser(object):
                                      | empty
         """
         if p[1]:
-            p[0] = [p[1]] if len(p) == 2 else p[1] + [p[3]]
+            p[0] = p[1] if len(p) == 2 else p[1] + p[3]
         
     def p_vardecl(self, p):
         """vardecl                   : t_var vdecl
@@ -181,19 +182,12 @@ class MorphoParser(object):
         p[0] = Fundecl(p)
     
     def p_params(self, p):
-        """params                    : params ',' param
-                                     | param
+        """params                    : params ',' t_name
+                                     | t_name
                                      | empty
         """
-        p[0] = 'params'
+        p[0] = [p[1]] if len(p) < 3 else p[1] + [p[3]]
     
-    def p_arg(self, p):
-        """param                     : t_var t_name '=' expr
-                                     | t_var t_name
-                                     | expr
-        """
-        p[0] = p[1:]
-        
     def p_body(self, p):
         """body                      : '{' statement_list ';' '}'
                                      | '{' statement_list '}'
@@ -266,7 +260,7 @@ class MorphoParser(object):
                                      | t_null
                                      | t_name
         """
-        p[0] = p[1]
+        p[0] = Literal(p)
         
     def p_empty(self, p):
         'empty                        :'

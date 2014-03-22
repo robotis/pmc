@@ -3,7 +3,6 @@
 #"main[f0]" =
 [
 (MakeValR null)
-(Return)
 ];
 }}
 *
