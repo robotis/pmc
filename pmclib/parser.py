@@ -12,6 +12,7 @@ import ply.yacc
 
 from . import lexer
 from .util import flatten
+from .units.call import Call
 from .units.fundecl import Fundecl
 from .units.literal import Literal
 from .units.vardecl import Vardecl
@@ -125,7 +126,7 @@ class MorphoParser(object):
     def out(self):
         print('"test.mexe" = main in\n{{')
         for unit in self.result:
-            unit.depth = 0
+            unit.depth = 1 if unit.name == 'main' else 0
             print(unit.emit(self))
         print('}}\n*\nBASIS\n;\n')
 
@@ -220,7 +221,15 @@ class MorphoParser(object):
                                      | t_if expr
         """
         p[0] = p[1:]
-    
+        
+    def p_exprlist(self, p):
+        """exprlist                  : exprlist ',' expr
+                                     | expr
+                                     | empty
+        """
+        if p[1]:
+            p[0] = [p[1]] if len(p) == 2 else p[1] + [p[3]]
+        
     def p_expr(self, p):
         """expr                      : expr '-' expr
                                      | expr '+' expr
@@ -245,10 +254,9 @@ class MorphoParser(object):
                 p[0] = Expression(p)
                 
     def p_call_expr(self, p):
-        """call_expr                 : t_name '(' expr ')'
-                                     | t_name '(' ')'
+        """call_expr                 : t_name '(' exprlist ')'
         """
-        p[0] = p[1:]
+        p[0] = Call(p)
                 
     def p_literal(self, p):
         """literal                   : t_integer

@@ -3,10 +3,9 @@
 main = 
 	fun(a)
 	{
-		for( var i=0 ; i<arrayLength(a); i += 1 )
-		{
-			a[i] = i;
-		}
+		var x = 1;
+		var y = 1;
+		return a + 1 + 1;	
 	};
 }}
 *

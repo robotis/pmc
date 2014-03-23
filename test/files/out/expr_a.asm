@@ -3,7 +3,8 @@
 #"main[f0]" =
 [
 (MakeVal 1)
-(MakeValP 1)
+(Push)
+(MakeVal 1)
 (CallR #"+[f2]" 2)
 ];
 }}
