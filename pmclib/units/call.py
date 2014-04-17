@@ -15,7 +15,7 @@ class Call(Base):
         for token in self.tokens:
             if hasattr(token, 'emit'):
                 expr.extend(token.emit(parent))
-        expr.append(('Call', '#"%s[f%d]" 1' % (self.name, parent.depth)))
+        expr.append(('Call', '#"%s[f%d]" 1' % (self.name, 0)))
         return expr
     
     def __repr__(self):

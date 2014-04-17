@@ -12,14 +12,14 @@ class Fundecl(Base):
         self.body = p[5]
         self.name = '<anonymous>'
         self.scope = {}
-        i = 0
+        self.argn = 0
         for arg in self.args:
-            self.scope[arg] = i
-            i += 1
+            self.scope[arg] = self.argn
+            self.argn += 1
         
     def emit(self, parser):
         self._parser = parser
-        p = ['#"%s[f%d]" =' % (self.name, self.depth), '[']
+        p = ['#"%s[f%d]" =' % (self.name, self.argn), '[']
         p.extend(self._emit_body(p))
         p.append('];')
         return '\n'.join(p)

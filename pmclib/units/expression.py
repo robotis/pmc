@@ -8,7 +8,6 @@ class Expression(Base):
         self.tokens = p[1:]
         
     def emit(self, parent):
-        self.depth = parent.depth + 1
         expr = []
         oper = None
         for token in self.tokens:
@@ -17,7 +16,7 @@ class Expression(Base):
             else: oper = token
         if oper and oper in ['+', '-', '/', '*', '%']:
             expr.pop()
-            expr.append(('Call', '#"%s[f%d]" 2' % (oper, self.depth)))
+            expr.append(('Call', '#"%s[f2]" 2' % oper))
         return expr
         
     def __repr__(self):
