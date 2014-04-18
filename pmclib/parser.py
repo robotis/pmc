@@ -12,13 +12,11 @@ import ply.yacc
 
 from . import lexer
 from .units.scope import Scope
-from .util import flatten
 from .units.call import Call
 from .units.fundecl import Fundecl
 from .units.literal import Literal
 from .units.vardecl import Vardecl
 from .units.expression import Expression
-from .units.listcomp import Listcomp
 
 import logging
 
@@ -202,34 +200,7 @@ class MorphoParser(object):
                                      | '{' statement_list '}'
         """
         p[0] = p[2]
-            
-#     def p_list_expr(self, p):
-#         """list_expr                 : '[' list_compr_expr ']'
-#                                      | '[' expr ']'
-#                                      | '[' ']' 
-#         """
-#         p[0] = p[1:]
-#         
-#     def p_list_compr_expr(self, p):
-#         """list_compr_expr           : expr t_for list_if t_in list_expr list_if
-#                                      | expr t_for expr t_in list_expr list_if
-#                                      | expr t_for list_if t_in t_name list_if
-#                                      | expr t_for expr t_in t_name list_if
-#                                      | expr t_for list_if t_in list_expr
-#                                      | expr t_for expr t_in list_expr
-#                                      | expr t_for list_if t_in call_expr
-#                                      | expr t_for expr t_in call_expr
-#                                      | expr t_for list_if t_in t_name
-#                                      | expr t_for expr t_in t_name
-#         """
-#         p[0] = Listcomp(p)
-#         
-#     def p_list_if(self, p):
-#         """list_if                   : t_if expr t_else expr
-#                                      | t_if expr
-#         """
-#         p[0] = p[1:]
-#        
+      
     def p_exprlist(self, p):
         """exprlist                  : exprlist ',' expr
                                      | expr
@@ -260,8 +231,6 @@ class MorphoParser(object):
                                      | t_return expr
                                      | if_expr
         """
-        #                            | list_compr_expr
-        #                            | list_expr
         if len(p) == 2:
             p[0] = p[1]
         else:
@@ -326,12 +295,6 @@ class MorphoParser(object):
         if t:
             print("\x1b[31mE: %s line: %d, Syntax Error, token: `%s`, `%s`\x1b[0m"
                   % (self.target, t.lineno, t.type, t.value), file=sys.stderr)
-#         while True:
-#             t = self.lex.token()
-#             if not t or t.value == '}':
-#                 if len(self.scope) > 1:
-#                     self.scope.pop()
-#                 break
         self.parser.restart()
         return t
 
@@ -342,7 +305,6 @@ class MorphoParser(object):
             line (int): line number
             t(str): Error type
         """
-#        print(e.trace())
         color = '\x1b[31m' if t == 'E' else '\x1b[33m'
         print("%s%s: line: %d: %s\n" %
               (color, t, line, e), end='\x1b[0m', file=sys.stderr)
