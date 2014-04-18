@@ -264,6 +264,7 @@ class MorphoParser(object):
     def p_eq_op(self, p):
         """eq_op                     : '>' '='
                                      | '<' '='
+                                     | '!' '='
         """
         p[0] = p[1] + p[2]
                 

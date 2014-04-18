@@ -3,5 +3,9 @@
 .settings
 *.mexe
 *.pyc
+*.aux
+*.dvi
+*.log
+*.pdf
 parser.out
 yacctab.py
