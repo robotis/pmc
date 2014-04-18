@@ -1,7 +1,6 @@
 """
 """
 from ._base import Base
-from pmclib.util import flatten
 
 class Fundecl(Base):
     
