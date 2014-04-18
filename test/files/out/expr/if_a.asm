@@ -11,7 +11,7 @@
 (MakeVal true)
 (Push)
 (Return)
-(_0 :)
+_0:
 (MakeValR false)
 ];
 }}

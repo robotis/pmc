@@ -25,9 +25,11 @@ import logging
 
 class MorphoParser(object):
     precedence = (
+        ('left', 't_and_op', 't_or_op'),
+        ('left', '<', '>', '='),
         ('left', '+', '-'),
         ('left', '/', '*', '%'),
-        ('right', 'UMINUS')
+        ('right', 'UMINUS'),
     )
     def __init__(self,
                  lex_optimize=True,
@@ -250,6 +252,9 @@ class MorphoParser(object):
                                      | expr '%' expr
                                      | expr '>' expr
                                      | expr '<' expr
+                                     | expr eq_op expr
+                                     | expr t_and_op expr
+                                     | expr t_or_op expr
                                      | '-' expr %prec UMINUS
                                      | '(' expr ')'
                                      | t_return expr
@@ -286,6 +291,12 @@ class MorphoParser(object):
         """call_expr                 : t_name '(' exprlist ')'
         """
         p[0] = Call(p)
+        
+    def p_eq_op(self, p):
+        """eq_op                     : '>' '='
+                                     | '<' '='
+        """
+        p[0] = p[1] + p[2]
                 
     def p_literal(self, p):
         """literal                   : t_integer

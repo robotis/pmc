@@ -37,10 +37,14 @@ class Fundecl(Base):
             body.append(('MakeVal', 'null'))
         if body:
             body = self.mkretEmit(body)
-        return ['(%s %s)' % (e[0], e[1])
-                if e[1] is not None 
-                else '(%s)' % e[0] 
-                for e in body]
+        return [self.format(u) for u in body]
+        
+    def format(self, u):
+        e, v = u
+        if v is None:
+            if e[0] == '_': return e
+            return '(%s)' % e
+        return '(%s %s)' % u
         
     def mkretEmit(self, body):
         e, v = body[-1]
