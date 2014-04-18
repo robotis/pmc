@@ -248,9 +248,12 @@ class MorphoParser(object):
                                      | expr '/' expr
                                      | expr '*' expr
                                      | expr '%' expr
+                                     | expr '>' expr
+                                     | expr '<' expr
                                      | '-' expr %prec UMINUS
                                      | '(' expr ')'
                                      | t_return expr
+                                     | if_expr
         """
         #                            | list_compr_expr
         #                            | list_expr
@@ -264,6 +267,20 @@ class MorphoParser(object):
                 p[0].value = '-%s' % p[0].value
             else:
                 p[0] = Expression(p)
+                
+    def p_if_expr(self, p):
+        """if_expr                   : t_if '(' expr ')' body elseiflist t_else body
+                                     | t_if '(' expr ')' body elseiflist
+        """
+        p[0] = Expression(p)
+    
+    def p_elseiflist(self, p):
+        """elseiflist                : elseiflist t_elsif '(' expr ')' body
+                                     | t_elsif '(' expr ')' body
+                                     | empty
+        """
+        if p[1]:
+            p[0] = p[1:]
                 
     def p_call_expr(self, p):
         """call_expr                 : t_name '(' exprlist ')'

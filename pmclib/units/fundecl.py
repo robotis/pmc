@@ -44,10 +44,8 @@ class Fundecl(Base):
         
     def mkretEmit(self, body):
         e, v = body[-1]
-        if e == 'Push':
-            e, v = body[-2]
-            del body[-2:]
-            body.append(("%sR" % e, v))
+        if e in ('Push', 'Return'):
+            return self.mkretEmit(body[:-1])
         body[-1] = ("%sR" % e, v)
         return body
     
