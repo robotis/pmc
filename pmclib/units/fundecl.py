@@ -13,39 +13,43 @@ class Fundecl(Base):
         self.name = '<anonymous>'
         self.scope = {}
         self.argn = 0
-        for arg in self.args:
-            self.scope[arg] = self.argn
-            self.argn += 1
         
-    def emit(self, parser):
-        self._parser = parser
+    def emit(self, scope):
+        self.scope = scope
+        self.scope.push()
+        if self.args:
+            for arg in self.args:
+                self.scope.set(arg, self.argn)
+                self.argn += 1
         p = ['#"%s[f%d]" =' % (self.name, self.argn), '[']
         p.extend(self._emit_body(p))
         p.append('];')
+        self.scope.pop()
         return '\n'.join(p)
     
     def _emit_body(self, p):
         body = []
         if self.body:
             for unit in self.body:
-                e = unit.emit(self)
+                e = unit.emit(self.scope)
                 body.extend(e)
         else:
-            body.append(('Makeval', 'null'))
+            body.append(('MakeVal', 'null'))
         if body:
-            newe = self.mkretEmit(body[-1])
-            if newe: body[-1] = newe
-            else: body.append(('Return', None))
+            body = self.mkretEmit(body)
         return ['(%s %s)' % (e[0], e[1])
                 if e[1] is not None 
                 else '(%s)' % e[0] 
                 for e in body]
         
-    def mkretEmit(self, emit):
-        e, v = emit
+    def mkretEmit(self, body):
+        e, v = body[-1]
         if e == 'Push':
-            return ('Return', None)
-        return ("%sR" % e, v)
+            e, v = body[-2]
+            del body[-2:]
+            body.append(("%sR" % e, v))
+        body[-1] = ("%sR" % e, v)
+        return body
     
     def __repr__(self):
         r = ['<function> %s <%s>' % (self.name, str(self.args))]

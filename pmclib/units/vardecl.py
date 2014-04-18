@@ -9,11 +9,17 @@ class Vardecl(Base):
                                      | t_val vdecl
         """
         self.name = p[1]
-        self.value = p[2:] if len(p) > 2 else 'null'
+        self.tokens = p[3:] if len(p) > 2 else None
     
-    def emit(self, parent):
-        return [('MakeVal', 'null'), ('Push', None)]
+    def emit(self, scope):
+        if not self.tokens:
+            return [('MakeVal', 'null'), ('Push', None)]
+        body = []
+        for unit in self.tokens:
+            e = unit.emit(scope)
+            body.extend(e)
+        return body
     
     def __repr__(self):
-        return '<var> %s <%s>' % (self.name, self.value)
+        return '<var %s: %s>' % (self.name, self.tokens)
     

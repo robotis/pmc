@@ -3,9 +3,10 @@
 #"main[f0]" =
 [
 (MakeVal null)
-(MakeValP null)
-(MakeValP null)
-(Return)
+(Push)
+(MakeVal null)
+(Push)
+(MakeValR null)
 ];
 }}
 *

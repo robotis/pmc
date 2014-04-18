@@ -8,10 +8,13 @@ class Literal(Base):
         """ """
         self.value = p[1]
     
-    def emit(self, parent):
-        if self.value in parent.scope:
-            return [('Fetch', parent.scope[self.value])]
-        return [('Makeval', self.value), ('Push', None)]
+    def emit(self, scope):
+        try:
+            n = scope.get(self.value)
+            return [('Fetch', n), ('Push', None)]
+        except KeyError:
+            pass
+        return [('MakeVal', self.value), ('Push', None)]
     
     def __repr__(self):
         return '<literal> %s' % (self.value)

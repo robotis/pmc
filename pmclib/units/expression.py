@@ -15,7 +15,6 @@ class Expression(Base):
                 expr.extend(token.emit(parent))
             else: oper = token
         if oper and oper in ['+', '-', '/', '*', '%']:
-            expr.pop()
             expr.append(('Call', '#"%s[f2]" 2' % oper))
         return expr
         

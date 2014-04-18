@@ -11,6 +11,7 @@ import sys
 import ply.yacc
 
 from . import lexer
+from .units.scope import Scope
 from .util import flatten
 from .units.call import Call
 from .units.fundecl import Fundecl
@@ -73,6 +74,7 @@ class MorphoParser(object):
             tabmodule=tabfile
         )
         self.stash = {}
+        self.scope = Scope()
         self.result = None
         self.target = None
 
@@ -123,13 +125,15 @@ class MorphoParser(object):
             else:
                 print("%s  | %s" % (''.ljust(30), ' '.join(rule[2:])))
         
-    def out(self):
-        print('"test.mexe" = main in\n{{')
+    def out(self, emit=True):
+        out = ['"test.mexe" = main in\n{{']
         for unit in self.result:
             unit.depth = 1 if unit.name == 'main' else 0
-            print(unit.emit(self))
-        print('}}\n*\nBASIS\n;\n')
-
+            out.append(unit.emit(self.scope))
+        out.append('}}\n*\nBASIS\n;\n')
+        if emit: print('\n'.join(out))
+        return '\n'.join(out)
+        
     def p_program(self, p):
         """program                   : program unit
                                      | unit
@@ -143,6 +147,7 @@ class MorphoParser(object):
         """
         p[0] = p[3]
         p[0].name = p[1]
+        self.scope.set(p[1], p[0])
         
     def p_statement(self, p):
         """statement                 : fundecl
@@ -161,7 +166,6 @@ class MorphoParser(object):
         
     def p_vardecl(self, p):
         """vardecl                   : t_var vdecl
-                                     | t_val vdecl
         """
         p[0] = p[2]
         
@@ -179,13 +183,13 @@ class MorphoParser(object):
         
     def p_fundecl(self, p):
         """fundecl                   : t_fun '(' params ')' body
+                                     | t_fun '(' empty ')' body
         """
         p[0] = Fundecl(p)
     
     def p_params(self, p):
         """params                    : params ',' t_name
                                      | t_name
-                                     | empty
         """
         p[0] = [p[1]] if len(p) < 3 else p[1] + [p[3]]
     
@@ -195,56 +199,54 @@ class MorphoParser(object):
         """
         p[0] = p[2]
             
-    def p_list_expr(self, p):
-        """list_expr                 : '[' list_compr_expr ']'
-                                     | '[' expr ']'
-                                     | '[' ']' 
-        """
-        p[0] = p[1:]
-        
-    def p_list_compr_expr(self, p):
-        """list_compr_expr           : expr t_for list_if t_in list_expr list_if
-                                     | expr t_for expr t_in list_expr list_if
-                                     | expr t_for list_if t_in t_name list_if
-                                     | expr t_for expr t_in t_name list_if
-                                     | expr t_for list_if t_in list_expr
-                                     | expr t_for expr t_in list_expr
-                                     | expr t_for list_if t_in call_expr
-                                     | expr t_for expr t_in call_expr
-                                     | expr t_for list_if t_in t_name
-                                     | expr t_for expr t_in t_name
-        """
-        p[0] = Listcomp(p)
-        
-    def p_list_if(self, p):
-        """list_if                   : t_if expr t_else expr
-                                     | t_if expr
-        """
-        p[0] = p[1:]
-        
+#     def p_list_expr(self, p):
+#         """list_expr                 : '[' list_compr_expr ']'
+#                                      | '[' expr ']'
+#                                      | '[' ']' 
+#         """
+#         p[0] = p[1:]
+#         
+#     def p_list_compr_expr(self, p):
+#         """list_compr_expr           : expr t_for list_if t_in list_expr list_if
+#                                      | expr t_for expr t_in list_expr list_if
+#                                      | expr t_for list_if t_in t_name list_if
+#                                      | expr t_for expr t_in t_name list_if
+#                                      | expr t_for list_if t_in list_expr
+#                                      | expr t_for expr t_in list_expr
+#                                      | expr t_for list_if t_in call_expr
+#                                      | expr t_for expr t_in call_expr
+#                                      | expr t_for list_if t_in t_name
+#                                      | expr t_for expr t_in t_name
+#         """
+#         p[0] = Listcomp(p)
+#         
+#     def p_list_if(self, p):
+#         """list_if                   : t_if expr t_else expr
+#                                      | t_if expr
+#         """
+#         p[0] = p[1:]
+#        
     def p_exprlist(self, p):
         """exprlist                  : exprlist ',' expr
                                      | expr
-                                     | empty
         """
         if p[1]:
             p[0] = [p[1]] if len(p) == 2 else p[1] + [p[3]]
         
     def p_expr(self, p):
-        """expr                      : expr '-' expr
+        """expr                      : literal
+                                     | call_expr
+                                     | expr '-' expr
                                      | expr '+' expr
                                      | expr '/' expr
                                      | expr '*' expr
                                      | expr '%' expr
-                                     | expr ',' expr
                                      | '-' expr %prec UMINUS
                                      | '(' expr ')'
-                                     | t_return expr
-                                     | list_compr_expr
-                                     | list_expr
-                                     | call_expr
-                                     | literal
         """
+        #                                      | t_return exp
+        #                            | list_compr_expr
+        #                            | list_expr
         if len(p) == 2:
             p[0] = p[1]
         else:

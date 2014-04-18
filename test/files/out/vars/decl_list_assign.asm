@@ -2,7 +2,11 @@
 {{
 #"main[f0]" =
 [
-(FetchR 3)
+(MakeVal 1)
+(Push)
+(MakeVal 2)
+(Push)
+(MakeValR 3)
 ];
 }}
 *
