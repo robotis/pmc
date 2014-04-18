@@ -51,6 +51,7 @@ class MorphoParser(object):
         self.verbose = verbose
         self.importlvl = importlvl
         self.lex = lexer.MorphoLexer()
+        self.outmodule = 'out'
         if self.verbose:
             try:
                 os.unlink(tabfile + '.py')
@@ -126,7 +127,7 @@ class MorphoParser(object):
                 print("%s  | %s" % (''.ljust(30), ' '.join(rule[2:])))
         
     def out(self, emit=True):
-        out = ['"test.mexe" = main in\n{{']
+        out = ['"%s.mexe" = main in\n{{' % self.outmodule]
         for unit in self.result:
             unit.depth = 1 if unit.name == 'main' else 0
             out.append(unit.emit(self.scope))
@@ -258,6 +259,9 @@ class MorphoParser(object):
         else:
             if p[1] == '(':
                 p[0] = p[2]
+            elif p[1] == '-':
+                p[0] = p[2]
+                p[0].value = '-%s' % p[0].value
             else:
                 p[0] = Expression(p)
                 

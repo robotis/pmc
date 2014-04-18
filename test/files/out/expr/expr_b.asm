@@ -1,13 +1,17 @@
-"test.mexe" = main in
+"out.mexe" = main in
 {{
 #"main[f0]" =
 [
 (MakeVal 1)
-(MakeValP 2)
+(Push)
+(MakeVal 2)
+(Push)
 (Call #"+[f2]" 2)
-(MakeValP 3)
+(MakeVal 3)
+(Push)
 (Call #"+[f2]" 2)
-(MakeValP 4)
+(MakeVal 4)
+(Push)
 (CallR #"+[f2]" 2)
 ];
 }}

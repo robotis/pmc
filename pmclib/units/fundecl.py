@@ -52,10 +52,10 @@ class Fundecl(Base):
         return body
     
     def __repr__(self):
-        r = ['<function> %s <%s>' % (self.name, str(self.args))]
+        r = ['<function %s <%s>' % (self.name, str(self.args))]
         if self.body:
             for _ in self.body: r.append('\t %s' % _)
         if not self.body and not self.retf:
             r.append('\t<empty>')
-        return '\n'.join(r)   
+        return '\n'.join(r) + '\n>'   
     

@@ -11,7 +11,7 @@ class TestFiles(unittest.TestCase):
         self._test_files('vars')
             
     def test_files_expr(self):
-        raise unittest.SkipTest()
+#         raise unittest.SkipTest()
         self._test_files('expr')
         
     def test_files_func(self):

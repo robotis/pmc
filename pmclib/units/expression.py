@@ -5,10 +5,10 @@ from ._base import Base
 class Expression(Base):
     
     def __init__(self, p):
-        self._assignto = None
+        self.assignto = None
         if p[2] == '=':
-            self.tokens = p[2:]
-            self._assignto = p[1]
+            self.tokens = p[3:]
+            self.assignto = p[1]
         else:
             self.tokens = p[1:]
         
@@ -21,9 +21,9 @@ class Expression(Base):
             else: oper = token
         if oper and oper in ['+', '-', '/', '*', '%']:
             expr.append(('Call', '#"%s[f2]" 2' % oper))
-        if self._assignto:
+        if self.assignto:
             try:
-                expr.append(('Store', scope.get(self._assignto)))
+                expr.append(('Store', scope.get(self.assignto)))
             except KeyError:
                 pass
         return expr

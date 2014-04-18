@@ -8,7 +8,10 @@ class Vardecl(Base):
         """vardecl                   : t_var vdecl
                                      | t_val vdecl
         """
-        self.name = p[1]
+        if hasattr(p[1], 'emit'):
+            self.name = p[1].assignto
+            p[1].assignto = None
+        else: self.name = p[1]
         self.tokens = []
         for u in p[1:]:
             if hasattr(u, 'emit'):

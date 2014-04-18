@@ -1,11 +1,14 @@
-"test.mexe" = main in
+"out.mexe" = main in
 {{
 #"main[f2]" =
 [
 (Fetch 0)
-(FetchP 1)
+(Push)
+(Fetch 1)
+(Push)
 (Call #"/[f2]" 2)
-(MakeValP 3)
+(MakeVal 3)
+(Push)
 (CallR #"+[f2]" 2)
 ];
 }}

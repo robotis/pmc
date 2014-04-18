@@ -40,6 +40,8 @@ def run():
                        default=False, help="Run lexer on target")
     group.add_argument('-B', '--bnf', action="store_true",
                        default=False, help="Output BNF")
+    group.add_argument('-m', '--morpho', action="store_true",
+                   default=False, help="Run thru morpho")
     group.add_argument('-q', '--quite', action="store_true",
                        default=False, help="Quite mode")
     aparse.add_argument('target', help="morpho file or directory")
@@ -67,12 +69,29 @@ def run():
                 print('\033[1;31m%s\033[0m' % e)
                 print('Abort...\n')
             sys.exit()
+        if not os.path.exists(args.target):
+            sys.exit("Target not found '%s' ..." % args.target)
+        #
+        #    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #
+        if args.morpho:
+            import subprocess
+            import tempfile
+            tmpfile = tempfile.NamedTemporaryFile(delete=False)
+            tmpfile.write('"out.mexe" = main in\n{{')
+            with open(args.target) as f:
+                tmpfile.write(f.read())
+            tmpfile.write('}}\n*\nBASIS\n;')
+            tmpfile.close()
+            cmd = ['morpho', '-c', '--asm', tmpfile.name]
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            print(p.communicate()[0])
+            os.unlink(tmpfile.name)
+            sys.exit()
         #
         #    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         #
         p = None
-        if not os.path.exists(args.target):
-            sys.exit("Target not found '%s' ..." % args.target)
         if os.path.isdir(args.target):
             if args.dry_run:
                 pass

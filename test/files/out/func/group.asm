@@ -1,4 +1,4 @@
-"test.mexe" = main in
+"out.mexe" = main in
 {{
 #"a[f0]" =
 [
