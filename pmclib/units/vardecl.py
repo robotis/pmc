@@ -9,9 +9,13 @@ class Vardecl(Base):
                                      | t_val vdecl
         """
         self.name = p[1]
-        self.tokens = p[3:] if len(p) > 2 else None
+        self.tokens = []
+        for u in p[1:]:
+            if hasattr(u, 'emit'):
+                self.tokens.append(u) 
     
     def emit(self, scope):
+        scope.set(self.name, None)
         if not self.tokens:
             return [('MakeVal', 'null'), ('Push', None)]
         body = []

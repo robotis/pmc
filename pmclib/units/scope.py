@@ -18,6 +18,7 @@ class Scope:
         
     def set(self, k, v):
         if self._stack:
+            if v is None: v = len(self._stack[-1].keys())
             self._stack[-1][k] = v
         else:
             self._globals[k] = v

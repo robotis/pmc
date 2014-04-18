@@ -152,6 +152,7 @@ class MorphoParser(object):
     def p_statement(self, p):
         """statement                 : fundecl
                                      | vardecl
+                                     | assign_expr
                                      | expr
         """
         p[0] = p[1] if type(p[1]) is list else [p[1]]
@@ -170,16 +171,16 @@ class MorphoParser(object):
         p[0] = p[2]
         
     def p_vdecl(self, p):
-        """vdecl                     : vdecl ',' vdecl_aux
-                                     | vdecl_aux
-        """
-        p[0] = [p[1]] if len(p) == 2 else p[1] + [p[3]]
-        
-    def p_vdecl_aux(self, p):
-        """vdecl_aux                 : t_name '=' expr
+        """vdecl                     : vdecl ',' assign_expr
+                                     | vdecl ',' t_name
+                                     | assign_expr
                                      | t_name
         """
-        p[0] = Vardecl(p)
+        if len(p) == 2:
+            p[0] = [Vardecl(p)]
+        else:
+            p[0] = p[1]
+            p[0].append(Vardecl(p[2:]))
         
     def p_fundecl(self, p):
         """fundecl                   : t_fun '(' params ')' body
@@ -232,6 +233,11 @@ class MorphoParser(object):
         """
         if p[1]:
             p[0] = [p[1]] if len(p) == 2 else p[1] + [p[3]]
+            
+    def p_assign_expr(self, p):
+        """assign_expr              : t_name '=' expr
+        """
+        p[0] = Expression(p)
         
     def p_expr(self, p):
         """expr                      : literal
@@ -243,8 +249,8 @@ class MorphoParser(object):
                                      | expr '%' expr
                                      | '-' expr %prec UMINUS
                                      | '(' expr ')'
+                                     | t_return expr
         """
-        #                                      | t_return exp
         #                            | list_compr_expr
         #                            | list_expr
         if len(p) == 2:

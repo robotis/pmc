@@ -3,7 +3,9 @@
 #"main[f2]" =
 [
 (Fetch 0)
-(FetchP 1)
+(Push)
+(Fetch 1)
+(Push)
 (CallR #"/[f2]" 2)
 ];
 }}

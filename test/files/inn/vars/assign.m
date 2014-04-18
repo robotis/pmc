@@ -1,13 +1,6 @@
-"test.mexe" = main in
-{{
 main = 
 	fun()
 	{
 		var a;
 		a = 1 + 1;
 	};
-}}
-*
-BASIS
-;
-
