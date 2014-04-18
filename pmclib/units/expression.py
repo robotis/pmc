@@ -27,7 +27,7 @@ class Expression(Base):
         for token in self.tokens:
             if hasattr(token, 'emit'):
                 expr.extend(token.emit(scope))
-            elif token == '&&':
+            elif token in ('&&', '||'):
                 expr.append( 'MARK' )
                 oper = token
             else:
@@ -36,6 +36,9 @@ class Expression(Base):
             expr.append(('Call', '#"%s[f2]" 2' % oper))
         if oper and oper == '&&': 
             expr = [('GoFalse', '_0 0') if u == 'MARK' else u for u in expr]
+            expr.append(('GoFalse', '_0 0'))
+        elif oper and oper == '||': 
+            expr = [('GoTrue', '_0 0') if u == 'MARK' else u for u in expr]
             expr.append(('GoFalse', '_0 0'))
         else:
             expr.append(('GoFalse', '_0 0'))
