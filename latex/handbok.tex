@@ -7,6 +7,10 @@
 \DeclareTextSymbolDefault{\TH}{T1}
 \DeclareTextSymbolDefault{\th}{T1}
 
+\usepackage{float}
+\floatstyle{boxed}
+\restylefloat{figure}
+
 \begin{document}
 
 \begin{center}
@@ -17,10 +21,11 @@
 \clearpage
 \paragraph{\Large Inngangur} ~\\
 
-Þessi þýðandi er fyrir nafnlaust mál, sem er "subset" af \emph{morpho}. Málið er eins uppset en
+Þessi þýðandi er fyrir nafnlaust mál, sem er "subset" af \emph{Morpho}. Málið er eins uppset en
 hefur mjög takmarkaða möguleika. Þýðandinn er skrifaður í \emph{python} forritunarmálinu. Keyrslu skáinn er \textbf{pmc.py} 
 í rótinni af útgáfuni.
-
+~\\
+~\\
 Allan kóða er hægt að sækja hér: \url{https://github.com/robotis/pmc}.
 
 \clearpage
@@ -83,8 +88,18 @@ BASIS
 ;
 \end{verbatim}
 
-Þessi þýðandi setur alltaf module-block í kringum úttakið, með nafninu "out.mexe". Einnig er BASIS alltaf tekinn inn. 
-Þetta úttak er svo hægt að keyra gegnum morpho til að fá keyrsluhæfa skrá
+Þessi þýðandi setur alltaf \emph{module-block} í kringum úttakið, með nafninu "out.mexe". Einnig er \textbf{BASIS} alltaf tekinn inn. 
+Þetta úttak er svo hægt að keyra gegnum \emph{morpho} til að fá keyrsluhæfa skrá:
+
+\begin{verbatim}
+$ python pmc.py empty.m > out.morpho
+$ morpho -c out.morpho
+Reused 1455 out of 2056 operations, 601 operation objects used.
+Reuse ratio is 71%
+$ morpho out
+\end{verbatim}
+
+Sem að sjálfsögðu myndi ekkert gera vegna þess að fallið er tómt.
 
 \paragraph{Einingarpróf} ~\\
 
@@ -96,98 +111,113 @@ $ python test/test_files.py
 \clearpage
 \paragraph{{\Large Málfræði}} ~\\
 
+Málið er \emph{subset} af Morpho, svo þeir hlutar sem eru notaðir eru eins upp bygðir.
+
 \paragraph{Lykilorð} ~\\
-\begin{tabular}{ l c r }
-  \hline
-  else & false & fun \\     
-  if   & null  & return \\   
-  true & var \\   
-  \hline
-\end{tabular}
+\begin{table}[h!]
+	\begin{center}
+	\begin{tabular}{ l c r }
+	  else & false & fun \\     
+	  if   & null  & return \\   
+	  true & var \\   
+	  \hline
+	\end{tabular}
+	\caption{Lykilorð (keywords)}
+	\end{center}
+\end{table}
 
-\paragraph{Forrit (program)} ~\\
+\clearpage
+\paragraph{Virkjar} ~\\
 
-Forrit er skilgreint sem eitt eða fleiri föll. Þar af er eitt fall sem verður að heita "main".
+\begin{figure}[h!]
+	\begin{syntdiag}
+	\begin{stack}
+		'\&\&' \\ '||' \\ '!=' \\
+		'\textless=' \\ '\textgreater=' \\
+		'\textless' \\ '\textgreater' \\
+		'+' \\ '-' \\ '*' \\ '/' \\ '\%'
+	\end{stack}
+	\end{syntdiag}
+	\caption{{\textless}oper{\textgreater}}
+\end{figure}
 
-\begin{syntdiag}
-\begin{rep} 
-	<fundecl> \\ ';'
-\end{rep} 
-\end{syntdiag}
-
-\paragraph{Föll (fundecl)} ~\\
-
-Föll eru alltaf skilgreind með nafni.
-
-\begin{syntdiag}
-<t_name> '=' 'fun' '('
-\begin{stack} \\
-	\begin{rep} 
-		<arg> \\ ','
-	\end{rep} 
-\end{stack} 
-')' <body>
-\end{syntdiag}
-
-Innihald falla (body):
-
-\begin{syntdiag}
-'\{'
-\begin{stack} \\
-	\begin{rep} 
-		\begin{stack}
-			<vardecl> \\
-			<expr> \\
-			<if_expr> \\
-			<t_return> 
-			\begin{stack} \\
-				<expr>
-			\end{stack} 
-		\end{stack} 
-		';'
-	\end{rep} 
-\end{stack} 
-'\}'
-\end{syntdiag}
-
-\paragraph{Virkjar (oper)} ~\\
-
-\begin{syntdiag}
-\begin{stack}
-	'\&\&' \\ '||' \\ '!=' \\
-	'\textless=' \\ '\textgreater=' \\
-	'\textless' \\ '\textgreater' \\
-	'+' \\ '-' \\ '*' \\ '/' \\ '\%'
-\end{stack}
-\end{syntdiag}
-
-\begin{tabular}{ l c r }
-Operator & Predecence \\
-\hline
-'/', '*', '\%' & 1 \\
-'+', '-' & 2 \\
-'\textless', '\textgreater', '=' & 3 \\
-'t_and_op', 't_or_op' & 4 \\
-\end{tabular}
+\begin{table}[h!]
+	\begin{center}
+	\begin{tabular}{ l c r }
+	Operator & Predecence \\
+	\hline
+	'/', '*', '\%' & 1 \\
+	'+', '-' & 2 \\
+	'\textless', '\textgreater', '=' & 3 \\
+	't_and_op', 't_or_op' & 4 \\
+	\end{tabular}
+	\caption{Operator predecence}
+	\end{center}
+\end{table}
 
 \paragraph{Dæmi um virkni:} ~\\
 
-\begin{tabular}{ l c r }
-1 + 2 + 3 & og & (1 + (2 + 3)) \\
-1 + 2 * 3 & og & (1 + (2 * 3)) \\
-1 * 2 + 3 & og & ((1 * 2) + 3) \\
-\end{tabular}
+\begin{table}[h!]
+	\begin{center}
+	\begin{tabular}{ l c r }
+	1 + 2 + 3 & og & (1 + (2 + 3)) \\
+	1 + 2 * 3 & og & (1 + (2 * 3)) \\
+	1 * 2 + 3 & og & ((1 * 2) + 3) \\
+	\end{tabular}
+	\caption{Operator examples}
+	\end{center}
+\end{table}
 
-\paragraph{Fastar (literal)} ~\\
+\clearpage
+\paragraph{Fastar} ~\\
 
-Fastar í málinu eru tölur, fleititölur og breytur. Einnig eru sérstakir fastar fyrir true, false og null.
-Tölur of fleititölur geta verið neikvæðar. Ekki er unnið með strengi.
+Fastar í málinu eru tölur, fleititölur og breytur. Einnig eru sérstakir fastar fyrir \emph{true}, \emph{false} og \emph{null}.
+Tölur of fleititölur geta verið neikvæðar. Ekki er unnið með strengi eða stafi.
 
-\begin{syntdiag}
-\begin{stack}
-	<t_name> \\ <t_int> \\ <t_float> \\ <t_null> \\ <t_false> \\ <t_true>
-\end{stack}
-\end{syntdiag}
+\begin{figure}[h!]
+	\begin{syntdiag}
+	\begin{stack}
+		<t_name> \\ <t_int> \\ <t_float> \\ <t_null> \\ <t_false> \\ <t_true>
+	\end{stack}
+	\end{syntdiag}
+	\caption{{\textless}literal{\textgreater}}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{syntdiag}
+	\begin{stack} \\
+		'-' 
+	\end{stack}
+	\begin{rep}
+		<0-9>
+	\end{rep}
+	\end{syntdiag}
+	\caption{{\textless}t_int{\textgreater}}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{syntdiag}
+	\begin{stack} \\
+		'-' 
+	\end{stack}
+	\begin{rep}
+		<0-9>
+	\end{rep}
+	'.'
+	\begin{rep}
+		<0-9>
+	\end{rep}
+	\end{syntdiag}
+	\caption{{\textless}t_float{\textgreater}}
+\end{figure}
+
+\paragraph{Sértákn} ~\\
+
+'\{', '\}', '(', '')', ',' og ';' er tákn sem hafa merkingu.
+
+\paragraph{Skjölun} ~\\
+
+Öll \emph{comment} byrja á ';;;' fyrir stakar línur, og '\{;;;' til ';;;\}' fyrir margar línur.
 
 \clearpage
 \paragraph{{\Large Mállýsing}}
@@ -276,48 +306,126 @@ Tölur of fleititölur geta verið neikvæðar. Ekki er unnið með strengi.
 \clearpage
 \paragraph{{\Large Merking málsins}}
 
-\paragraph{Breytur (vardecl)} ~\\
+\paragraph{Forrit} ~\\
 
-Breytur mega ekki byrja á tölustaf en mega annars innihalda [a-z0-9_]
+Forrit er skilgreint sem eitt eða fleiri föll. Þar af er eitt fall sem verður að heita "main".
 
-\begin{syntdiag}
-'var' 
-\begin{rep}
-	<t_name> 
-	\begin{stack} \\
-		'=' <expr>
-	\end{stack} \\ ','
-\end{rep} 
-';'
-\end{syntdiag}
-
-\paragraph{Segðir (expr)} ~\\
-\begin{syntdiag}
-\begin{stack}
-	<expr> <oper> <expr> \\
-	<call_expr> \\
-	'(' <expr> ')' \\
-	<literal>
-\end{stack} 
-\end{syntdiag}
-
-\paragraph{Kallsegð (call\_expr)} ~\\
-\begin{syntdiag}
-<t_name> '('
-\begin{stack} \\
+\begin{figure}[h!]
+	\begin{syntdiag}
 	\begin{rep} 
-		<arg> \\ ','
+		<fundecl> \\ ';'
 	\end{rep} 
-\end{stack} 
-')'
-\end{syntdiag}
+	\end{syntdiag}
+	\caption{{\textless}program{\textgreater}}
+\end{figure}
 
-\paragraph{if-segð (if\_expr)} ~\\
-\begin{syntdiag}
-<t_if> '(' <expr> ')' <body>
-\begin{stack} \\
-	<t_else> <body>
-\end{stack} 
-\end{syntdiag}
+\clearpage
+\paragraph{Föll} ~\\
+
+Föll eru alltaf skilgreind með nafni.
+
+\begin{figure}[h!]
+	\begin{syntdiag}
+	<t_name> '=' 'fun' '('
+	\begin{stack} \\
+		\begin{rep} 
+			<arg> \\ ','
+		\end{rep} 
+	\end{stack} 
+	')' <body>
+	\end{syntdiag}
+	\caption{{\textless}fundecl{\textgreater}}
+\end{figure}
+
+
+\begin{figure}[h!]
+	\begin{syntdiag}
+	\begin{stack}
+		<t_name> \\
+		<expr>
+	\end{stack} 
+	\end{syntdiag}
+	\caption{{\textless}arg{\textgreater}}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{syntdiag}
+	'\{'
+	\begin{stack} \\
+		\begin{rep} 
+			\begin{stack}
+				<vardecl> \\
+				<expr> \\
+				<if_expr> \\
+				<t_return> 
+				\begin{stack} \\
+					<expr>
+				\end{stack} 
+			\end{stack} 
+			';'
+		\end{rep} 
+	\end{stack} 
+	'\}'
+	\end{syntdiag}
+	\caption{{\textless}body{\textgreater}}
+\end{figure}
+
+\paragraph{Breytur} ~\\
+
+Breytur mega ekki byrja á tölustaf en mega annars innihalda [a-z0-9_]. Breytur eru null ef ekki settar.
+
+\begin{figure}[h!]
+	\begin{syntdiag}
+	'var' 
+	\begin{rep}
+		<t_name> 
+		\begin{stack} \\
+			'=' <expr>
+		\end{stack} \\ ','
+	\end{rep} 
+	';'
+	\end{syntdiag}
+	\caption{{\textless}vardecl{\textgreater}}
+\end{figure}
+
+\clearpage
+\paragraph{Segðir} ~\\
+
+\begin{figure}[h!]
+	\begin{syntdiag}
+	\begin{stack}
+		<expr> <oper> <expr> \\
+		<call_expr> \\
+		'(' <expr> ')' \\
+		<literal>
+	\end{stack} 
+	\end{syntdiag}
+	\caption{{\textless}expr{\textgreater}}
+\end{figure}
+
+\paragraph{Kallsegð} ~\\
+\begin{figure}[h!]
+	\begin{syntdiag}
+	<t_name> '('
+	\begin{stack} \\
+		\begin{rep} 
+			<arg> \\ ','
+		\end{rep} 
+	\end{stack} 
+	')'
+	\end{syntdiag}
+	\caption{{\textless}call\_expr{\textgreater}}
+\end{figure}
+
+\paragraph{if-segð} ~\\
+\begin{figure}[h!]
+	\begin{syntdiag}
+	<t_if> '(' <expr> ')' <body>
+	\begin{stack} \\
+		<t_else> <body>
+	\end{stack} 
+	\end{syntdiag}
+	\caption{{\textless}if\_expr{\textgreater}}
+\end{figure}
 
 \end{document}
