@@ -25,7 +25,7 @@ VERSION_STR = 'pmc - python morpho compiler 0.1a'
 def run():
     """Run compiler
     """
-    aparse = argparse.ArgumentParser(description='Morpho Compiler',
+    aparse = argparse.ArgumentParser(description='Morpho (Subset) Compiler',
                                      epilog='<< jtm@robot.is @_o >>')
     aparse.add_argument('-v', '--version', action='version',
                         version=VERSION_STR)
@@ -41,10 +41,10 @@ def run():
     group.add_argument('-B', '--bnf', action="store_true",
                        default=False, help="Output BNF")
     group.add_argument('-m', '--morpho', action="store_true",
-                   default=False, help="Run thru morpho")
+                   default=False, help="Run thru morpho (morpho command must be available)")
     group.add_argument('-q', '--quite', action="store_true",
                        default=False, help="Quite mode")
-    aparse.add_argument('target', help="morpho file or directory")
+    aparse.add_argument('target', help="morpho file")
     args = aparse.parse_args()
     try:
         #
