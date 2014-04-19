@@ -49,7 +49,7 @@ limitations under the License.
 Running tests:
 ==============
 
-$ python3 test/test_files.py
+$ python test/test_files.py
 
 
 
