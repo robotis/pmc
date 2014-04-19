@@ -31,6 +31,8 @@ Allan kóða er hægt að sækja hér: \url{https://github.com/robotis/pmc}.
 \clearpage
 \paragraph{{\Large Notkun og uppsetning}} ~\\
 
+Pakkin \href{http://www.dabeaz.com/ply/ply.html}{python-ply} þarf að vera uppsettur til að keyra pmc.py.
+
 \paragraph{pmc.py} ~\\
 
 \begin{verbatim}
@@ -172,7 +174,7 @@ Málið er \emph{subset} af Morpho, svo þeir hlutar sem eru notaðir eru eins u
 \paragraph{Fastar} ~\\
 
 Fastar í málinu eru tölur, fleititölur og breytur. Einnig eru sérstakir fastar fyrir \emph{true}, \emph{false} og \emph{null}.
-Tölur of fleititölur geta verið neikvæðar. Ekki er unnið með strengi eða stafi.
+Tölur og fleititölur geta verið neikvæðar. Ekki er unnið með strengi eða stafi.
 
 \begin{figure}[h!]
 	\begin{syntdiag}
@@ -329,23 +331,12 @@ Föll eru alltaf skilgreind með nafni.
 	<t_name> '=' 'fun' '('
 	\begin{stack} \\
 		\begin{rep} 
-			<arg> \\ ','
+			<t_name> \\ ','
 		\end{rep} 
 	\end{stack} 
 	')' <body>
 	\end{syntdiag}
 	\caption{{\textless}fundecl{\textgreater}}
-\end{figure}
-
-
-\begin{figure}[h!]
-	\begin{syntdiag}
-	\begin{stack}
-		<t_name> \\
-		<expr>
-	\end{stack} 
-	\end{syntdiag}
-	\caption{{\textless}arg{\textgreater}}
 \end{figure}
 
 \begin{figure}[h!]
@@ -409,7 +400,7 @@ Breytur mega ekki byrja á tölustaf en mega annars innihalda [a-z0-9_]. Breytur
 	<t_name> '('
 	\begin{stack} \\
 		\begin{rep} 
-			<arg> \\ ','
+			<expr> \\ ','
 		\end{rep} 
 	\end{stack} 
 	')'
