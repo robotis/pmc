@@ -8,5 +8,6 @@
 *.log
 *.pdf
 *.out
+*~
 parser.out
 yacctab.py
